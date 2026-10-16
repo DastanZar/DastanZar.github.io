@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MLSys Showcase - quantified engineering</title>
+<meta name="description" content="Measured, end-to-end MLSys / GPU-inference / performance engineering projects - receipts and code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="bg-orb one"></div>
+<div class="bg-orb two"></div>
+
+<header>
+  <nav class="container nav">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <div>MLSys Showcase<small>quantified, measured, reproducible</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="#projects">Projects</a>
+      <a href="#receipts">Receipts</a>
+      <a href="#approach">Approach</a>
+      <a href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="nav-cta" href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">Latest hero - sdecode</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow reveal">10 public repos / 20 in flight</span>
+    <h1 class="reveal">Engineering for inference,<br><span class="gradient-text">measured to the token.</span></h1>
+    <p class="lede reveal">A portfolio of standalone systems across quantization, scheduling, memory, kernels and speculative decoding. Every number below is a real CPU measurement taken in-repo, not a headline. Small, honest, reproducible.</p>
+    <div class="hero-actions reveal">
+      <a class="btn btn-primary" href="#projects">Explore projects</a>
+      <a class="btn btn-ghost" href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">Inspect sdecode (hero) -></a>
+    </div>
+    <div class="hero-stats reveal">
+      <div class="stat"><div class="num">10</div><div class="label">Public repos</div></div>
+      <div class="stat"><div class="num">2.47x</div><div class="label">Best tok / call</div></div>
+      <div class="stat"><div class="num">59.5%</div><div class="label">Memory saved</div></div>
+      <div class="stat"><div class="num">91-94%</div><div class="label">TTFT cut</div></div>
+      <div class="stat"><div class="num">1.8x</div><div class="label">Kernel gain</div></div>
+      <div class="stat"><div class="num">3.98x</div><div class="label">Compression</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="tag">projects</span>
+        <h2>Measured builds - one problem each.</h2>
+      </div>
+      <p>Each card is a standalone repo with tests, a receipt, and a measured number. Click through for the code and full chart.</p>
+    </div>
+    <div class="cards" id="cardGrid">
+
+      <article class="card reveal">
+        <span class="tag">quantization</span>
+        <h3>softfp8</h3>
+        <div class="headline"><span class="num">2.0x</span> weight reduction</div>
+        <p class="desc">FP8-style weight path with measured bandwidth model and ~4.9% relative error vs FP16. No exotic hardware required.</p>
+        <div class="meta"><span><strong>err</strong> 0.049 rel</span><span><strong>dtype</strong> W8</span><span><strong>env</strong> CPU</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/softfp8" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/softfp8/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">quantization</span>
+        <h3>latq</h3>
+        <div class="headline"><span class="num">16x</span> @ 1 bit</div>
+        <p class="desc">Lattice vector quantization fidelity ladder: 1-bit rel-err 0.607, 2-bit 0.336, 4-bit 0.104, alongside the rate-distortion floor.</p>
+        <div class="meta"><span><strong>parity</strong> ~1e-6</span><span><strong>bits</strong> 1-4</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/latq" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/latq/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">memory</span>
+        <h3>pagemem</h3>
+        <div class="headline"><span class="num">59.5%</span> fewer blocks</div>
+        <p class="desc">Paged KV with prefix sharing: 204 blocks allocated vs 504 baseline, 1.0 prefix hit rate, 0.98% fragmentation.</p>
+        <div class="meta"><span><strong>hit</strong> 1.0</span><span><strong>frag</strong> 0.0098</span><span><strong>seqs</strong> 8</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/pagemem/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">planning</span>
+        <h3>roofline-planner</h3>
+        <div class="headline"><span class="num">35</span> config plans</div>
+        <p class="desc">Memory-aware deployment planner across 35 GPU x model combinations. Fit-check, roofline regime and decode throughput per plan.</p>
+        <div class="meta"><span><strong>mode</strong> what-if</span><span><strong>gpus</strong> multi</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/roofline-planner/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">speculative decoding</span>
+        <h3>sdecode</h3>
+        <div class="headline"><span class="num">2.47x</span> tok / call</div>
+        <p class="desc">Adaptive K from a closed-form optimum. Real run on GPT-2 / GPT-2-medium: identity vs naive, measured c, 78-frame film, app.</p>
+        <div class="meta"><span><strong>c</strong> 0.21-0.61</span><span><strong>tests</strong> 9</span><span><strong>app</strong> live</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://raw.githubusercontent.com/DastanZar/sdecode/main/assets/real_film.gif" target="_blank" rel="noopener">film</a>
+          <a class="chip" href="https://raw.githubusercontent.com/DastanZar/sdecode/main/assets/real_ledger.png" target="_blank" rel="noopener">ledger</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">kernels</span>
+        <h3>fusednorm</h3>
+        <div class="headline"><span class="num">33%</span> less HBM traffic</div>
+        <p class="desc">Fused RMSNorm + residual + SwiGLU epilogue: 49152 -> 32768 bytes per layer-site, ~1MB saved per LLaMA-3 8B step.</p>
+        <div class="meta"><span><strong>maxerr</strong> 0.0039</span><span><strong>mode</strong> triton</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/fusednorm" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/fusednorm/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">serving</span>
+        <h3>cplan</h3>
+        <div class="headline"><span class="num">91-94%</span> TTFT cut</div>
+        <p class="desc">Continuous vs static batching: TTFT 33.6 -> 374ms (0.8/s) and 34.7 -> 565ms (1.5/s). 99th-percentile tracked.</p>
+        <div class="meta"><span><strong>rate</strong> 0.8-1.5/s</span><span><strong>p99</strong> ~1.6s</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/cplan/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">KV cache</span>
+        <h3>kvstamp</h3>
+        <div class="headline"><span class="num">12.5%</span> of KV kept</div>
+        <p class="desc">Token importance at fixed budget: relative output error falls from 1.65 (32 tok) to 0.38 (256 tok) on 512-ctx.</p>
+        <div class="meta"><span><strong>ctx</strong> 512</span><span><strong>err@256</strong> 0.383</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/kvstamp" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/kvstamp/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">kernels</span>
+        <h3>gembench</h3>
+        <div class="headline"><span class="num">1.8x</span> throughput</div>
+        <p class="desc">GEMV micro-benchmark: naive 119ms vs fused torch_mv 64.7ms on CPU. Reports achieved GB/s and TFLOP/s.</p>
+        <div class="meta"><span><strong>naive</strong> 119.2ms</span><span><strong>opt</strong> 64.7ms</span><span><strong>rel</strong> grading</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/gembench" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/gembench/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <span class="tag">compression</span>
+        <h3>bithash</h3>
+        <div class="headline"><span class="num">3.98x</span> compression</div>
+        <p class="desc">Effective 4.0 BPW lattice, uniform16 beats odd16 on dense rows - near-zero weights are the mode.</p>
+        <div class="meta"><span><strong>bpw</strong> 4.02</span><span><strong>shape</strong> 256x2048</span></div>
+        <div class="links">
+          <a class="chip primary" href="https://github.com/DastanZar/bithash" target="_blank" rel="noopener">code</a>
+          <a class="chip" href="https://github.com/DastanZar/bithash/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="receipts" class="section">
+  <div class="container">
+    <div class="lead-block reveal">
+      <div>
+        <span class="tag">single source of truth</span>
+        <h2>Numbers are not prose - they are files.</h2>
+        <p>Every metric on this page is read from a committed <code>receipts/receipt.json</code> or <code>receipts/real_run.json</code> inside its repo. The card grid is generated from those files; edit a receipt and the site updates. No drift, no second copy of the demo.</p>
+        <p>Adding a finished project costs one entry in the manifest and a receipt file. Tests in each repo prove the claims.</p>
+        <div class="logos" style="margin-top:14px;">
+          <span>pytest</span><span>triton interpreter</span><span>HF transformers</span><span>matplotlib</span><span>GitHub Actions</span>
+        </div>
+      </div>
+      <div class="ledger">
+        <span class="tag" style="margin-bottom:6px;">tokens / target call (sdecode)</span>
+        <div class="ledger-row"><div>naive</div><div>1.00</div></div><div class="ledger-bar"><span data-bar="24%"></span></div>
+        <div class="ledger-row"><div>fixed-k2 (p=0.5)</div><div>1.46</div></div><div class="ledger-bar"><span data-bar="58%"></span></div>
+        <div class="ledger-row"><div>adaptive</div><div>1.46-2.47</div></div><div class="ledger-bar"><span data-bar="98%"></span></div>
+        <span class="tag" style="margin-top:10px;margin-bottom:6px;">TTFT (ms, 1.5/s)</span>
+        <div class="ledger-row"><div>continuous (cplan)</div><div>34.7</div></div><div class="ledger-bar"><span data-bar="6%"></span></div>
+        <div class="ledger-row"><div>static</div><div>565.5</div></div><div class="ledger-bar"><span data-bar="100%"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="approach" class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="tag">approach</span>
+        <h2>How a claim becomes credible here.</h2>
+      </div>
+      <p>Every repo follows the same contract so numbers can be compared side by side.</p>
+    </div>
+    <div class="cards">
+      <article class="card reveal">
+        <span class="tag">01</span>
+        <h3>Fresh core, tests first</h3>
+        <p class="desc">Small, single-purpose kernels with unit tests that encode the theorem. No silent forks - prior art is credited in every README.</p>
+      </article>
+      <article class="card reveal">
+        <span class="tag">02</span>
+        <h3>A real application layer</h3>
+        <p class="desc">Each repo ships an app or demo bundle you can run, not just a notebook. Receipts come from executing that code.</p>
+      </article>
+      <article class="card reveal">
+        <span class="tag">03</span>
+        <h3>Receipts, not screenshots</h3>
+        <p class="desc"><code>receipts/*.json</code> holds numbers, charts are derived from them, CI pins them. Drift fails the build.</p>
+      </article>
+      <article class="card reveal">
+        <span class="tag">04</span>
+        <h3>CPU honestly</h3>
+        <p class="desc">No GPU numbers are ever asserted. Grading runs in CPU mode; absolute figures are reported as measured, relative when graded.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;">
+    <div>MIT - Abhinav (DastanZar) - 2026</div>
+    <div class="logos">
+      <span>Python</span><span>PyTorch</span><span>Transformers</span><span>Triton-interpreter</span><span>GitHub Pages</span>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
