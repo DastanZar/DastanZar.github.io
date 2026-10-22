@@ -1,0 +1,21 @@
+{
+  "environment": "cpu",
+  "gpu_peak": {
+    "available": false,
+    "reason": "no CUDA device \u2014 grading runs in relative mode; run on a GPU for absolute % of peak"
+  },
+  "naive_rows": {
+    "ms": 119.24,
+    "correct": true,
+    "achieved_gbps": 0.3,
+    "achieved_tflops": 0.0,
+    "speedup_vs_naive": 1.0
+  },
+  "torch_mv": {
+    "ms": 64.722,
+    "correct": true,
+    "achieved_gbps": 0.5,
+    "achieved_tflops": 0.0,
+    "speedup_vs_naive": 1.8
+  }
+}

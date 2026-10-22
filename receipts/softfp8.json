@@ -1,0 +1,27 @@
+{
+  "triton_interpreter_mode": true,
+  "has_triton": true,
+  "kernel_vs_reference_max_abs_err": 1.6093254089355469e-06,
+  "w8_vs_fp16_relative_output_error": 0.04874250292778015,
+  "weight_bytes_reduction": "2.0x (14.0 GB -> 7.0 GB per token, 7B model)",
+  "bandwidth_model": {
+    "gtx1060-6gb": {
+      "fp16_tok_s": 7.4,
+      "w8_tok_s": 14.9,
+      "gb_per_token_fp16": 14.0,
+      "gb_per_token_w8": 7.0
+    },
+    "rtx3060-12gb": {
+      "fp16_tok_s": 16.7,
+      "w8_tok_s": 33.4,
+      "gb_per_token_fp16": 14.0,
+      "gb_per_token_w8": 7.0
+    },
+    "rtx3090-24gb": {
+      "fp16_tok_s": 43.5,
+      "w8_tok_s": 86.9,
+      "gb_per_token_fp16": 14.0,
+      "gb_per_token_w8": 7.0
+    }
+  }
+}

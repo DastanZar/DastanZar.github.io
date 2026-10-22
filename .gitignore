@@ -1,0 +1,11 @@
+# Local research and screenshot material, not part of the published site.
+refs/
+shots/
+tools/
+contact_sheet.png
+
+# Python / OS noise.
+__pycache__/
+*.pyc
+Thumbs.db
+.DS_Store
