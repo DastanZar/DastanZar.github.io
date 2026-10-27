@@ -62,6 +62,7 @@
     <nav class="nav-links" aria-label="Primary">
       <a href="#work"><span>01</span>Work</a>
       <a href="#inventory"><span>02</span>Inventory</a>
+      <a href="#losses"><span>—</span>Losses</a>
       <a href="#receipts"><span>03</span>Receipts</a>
       <a href="#method"><span>04</span>Method</a>
       <a href="#about"><span>05</span>About</a>
@@ -91,6 +92,7 @@
               <a class="btn btn-ink" href="#work">Selected systems <span aria-hidden="true">↓</span></a>
               <a class="btn btn-ghost" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
             </div>
+            <p class="hero-nogpu"><span class="hero-nogpu-dot" aria-hidden="true"></span>Every number on this page ran on a CPU. No GPU needed to check any of it.</p>
           </div>
         </div>
         <aside class="hero-aside" aria-label="Portfolio facts and mascot">
@@ -281,7 +283,7 @@
             <span>MODELED*</span>
             <small>*unless labeled</small>
           </div>
-          <ul class="aside-facts"><li><span>CASE FILES</span><strong>10 on this page</strong></li><li><span>INVENTORY</span><strong>20 public repos</strong></li><li><span>GPU CLAIMS</span><strong>0 unlabeled</strong></li><li><span>RECEIPTS</span><strong>20 linked</strong></li></ul>
+          <ul class="aside-facts"><li><span>CASE FILES</span><strong>10 on this page</strong></li><li><span>INVENTORY</span><strong>20 public repos</strong></li><li><span>MEASURED ON</span><strong>CPU only</strong></li><li><span>GPU CLAIMS</span><strong>0 unlabeled</strong></li><li><span>RECEIPTS</span><strong>20 linked</strong></li></ul>
           <div class="scroll-cue" aria-hidden="true"><span>SCROLL</span><span class="scroll-line"></span></div>
         </aside>
       </div>
@@ -318,6 +320,7 @@
     <div class="case-meta"><span class="case-no">01</span><span>Speculative decoding</span><span>2026</span></div>
     <h3>sdecode</h3>
     <p class="case-claim"><strong>5.69×</strong> tokens per target call<span class="case-period">.</span></p>
+    <p class="case-so">Six words per slow step, instead of one.</p>
     <p class="case-desc">A measured draft/verify harness for real models: a smaller drafter proposes, the target verifies a batch, and every lane is checked token-for-token against the naive target. The receipt keeps the wins and the losses.</p>
     <dl class="specs">
       <div class="spec"><dt>TARGET / DRAFTER</dt><dd>gpt2 / distilgpt2</dd></div>
@@ -373,6 +376,7 @@
 </svg>
   </div>
   <p class="case-claim"><strong>59.5% fewer blocks</strong></p>
+  <p class="case-so">The same card holds about 2.5&thinsp;&times;&thinsp;more conversations.</p>
   <p class="case-desc">The allocator shares a 512-token system prefix and pages the rest. The 504-block preallocated baseline becomes 204 blocks, with the block map committed next to the numbers.</p>
   <div class="case-links">
     <a class="text-link strong" href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
@@ -400,6 +404,7 @@
 </svg>
   </div>
   <p class="case-claim"><strong>94% lower TTFT</strong></p>
+  <p class="case-so">The wait for the first word falls by 94%.</p>
   <p class="case-desc">A continuous scheduler lets every slot refill the moment it frees. Static batching waits for the longest job. The receipt records TTFT and p99 at four request rates.</p>
   <div class="case-links">
     <a class="text-link strong" href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
@@ -480,6 +485,7 @@
       <div><b>20</b><span>receipt links</span></div>
       <div><b>04</b><span>live apps</span></div>
     </div>
+    <p class="inventory-launch reveal">New here? Start with <a class="text-link strong" href="app/kvdesk/index.html" target="_blank" rel="noopener">the KV desk <span aria-hidden="true">↗</span></a> — one interactive tour of attention memory, built from three receipts.</p>
 <div class="inventory-theme reveal" data-theme="decode">
       <div class="inventory-theme-head">
         <span class="inventory-theme-no">01</span>
@@ -494,6 +500,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">sdecode</a></h4>
           <p class="inventory-claim"><strong>5.69×</strong> tokens per target call</p>
+          <p class="inventory-so">Six words per slow step, instead of one.</p>
           <p class="inventory-desc">Measured draft/verify on real GPT-2 weights, token-identical to the naive lane.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">repo</a>
@@ -507,6 +514,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/treetrace" target="_blank" rel="noopener">treetrace</a></h4>
           <p class="inventory-claim"><strong>5.28×</strong> packed node pass</p>
+          <p class="inventory-so">A kernel 5.3&thinsp;&times;&thinsp;faster that only moves the finish line 1.06&thinsp;&times;.</p>
           <p class="inventory-desc">Random 2-layer CPU model: nearby drafts accept 3 of 4 tokens. The packed node pass is 5.28× faster, but end-to-end is only 1.06×; independent drafts regress.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/treetrace" target="_blank" rel="noopener">repo</a>
@@ -519,6 +527,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/pushdown" target="_blank" rel="noopener">pushdown</a></h4>
           <p class="inventory-claim"><strong>25/103</strong> legal tokens</p>
+          <p class="inventory-so">One gate token in 103 passes; the JSON value state keeps only 25.</p>
           <p class="inventory-desc">Stack-aware JSON mask keeps 25 of 103 tokens at the value state. A 1,024-deep synthetic stack parses in 51 ms; not a production DFA.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/pushdown" target="_blank" rel="noopener">repo</a>
@@ -531,6 +540,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/streamdetok" target="_blank" rel="noopener">streamdetok</a></h4>
           <p class="inventory-claim"><strong>60.1×</strong> faster <i>/</i> 0 replacements</p>
+          <p class="inventory-so">Text streams without ever splitting a character in half.</p>
           <p class="inventory-desc">CPU byte-level test: 128-byte chunks over a 2,880-byte payload, 60.1× faster than the custom path with zero replacements, versus 18 naive splits. No tokenizer context.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/streamdetok" target="_blank" rel="noopener">repo</a>
@@ -553,6 +563,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">cplan</a></h4>
           <p class="inventory-claim"><strong>94%</strong> lower TTFT</p>
+          <p class="inventory-so">The wait for the first word falls by 94%.</p>
           <p class="inventory-desc">Continuous batching against a static scheduler, with p99 in the same receipt.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">repo</a>
@@ -566,6 +577,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/chunkpipe" target="_blank" rel="noopener">chunkpipe</a></h4>
           <p class="inventory-claim"><strong>71.7%</strong> lower p95 TTFT <i>/</i> 1 burst/s</p>
+          <p class="inventory-so">Long inputs are cut into chunks so nobody waits behind one giant job.</p>
           <p class="inventory-desc">Synthetic CPU service model, Poisson bursts, six requests each: 128→8192-token chunks cut p95 TTFT from 21.7s to 6.1s at 1 burst/s; the 5/s gain is 46.7%.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/chunkpipe" target="_blank" rel="noopener">repo</a>
@@ -578,6 +590,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/gatekeeper" target="_blank" rel="noopener">gatekeeper</a></h4>
           <p class="inventory-claim"><strong>71.8%</strong> lower p95 response</p>
+          <p class="inventory-so">A bouncer that keeps the queue calm by turning away the flood.</p>
           <p class="inventory-desc">Synthetic CPU open-loop burst, 300 requests: token bucket and GCRA hold p95 at 4.07s versus 14.46s for fixed window; admitted count 90 vs 88.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/gatekeeper" target="_blank" rel="noopener">repo</a>
@@ -590,6 +603,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/radixlite" target="_blank" rel="noopener">radixlite</a></h4>
           <p class="inventory-claim"><strong>92.3%</strong> prefill saved</p>
+          <p class="inventory-so">Similar questions route to the same worker and reuse the prefill.</p>
           <p class="inventory-desc">CPU token-slot simulation: cache-aware routing saves 92.3% of prefill tokens at a 128-slot budget; round-robin saves 73.4%. Routing costs 58.1ms vs 23.9ms.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/radixlite" target="_blank" rel="noopener">repo</a>
@@ -612,6 +626,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">pagemem</a></h4>
           <p class="inventory-claim"><strong>59.5%</strong> fewer blocks</p>
+          <p class="inventory-so">The same card holds about 2.5&thinsp;&times;&thinsp;more conversations.</p>
           <p class="inventory-desc">Prefix-shared paged KV; a 504-block baseline collapses to 204 blocks.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">repo</a>
@@ -625,6 +640,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/kvstamp" target="_blank" rel="noopener">kvstamp</a></h4>
           <p class="inventory-claim"><strong>8.0×</strong> KV compression <i>/</i> 1.14 error</p>
+          <p class="inventory-so">An eighth of the attention memory, if you keep the right tokens.</p>
           <p class="inventory-desc">Token importance at a fixed budget, swept until the error knee is visible.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/kvstamp" target="_blank" rel="noopener">repo</a>
@@ -637,6 +653,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/expertcache" target="_blank" rel="noopener">expertcache</a></h4>
           <p class="inventory-claim"><strong>14.2%</strong> fewer misses <i>/</i> hot scan</p>
+          <p class="inventory-so">Cache the experts you actually use &mdash; while the pattern holds.</p>
           <p class="inventory-desc">CPU expert-cache policy pack: cost2q cuts misses 14.2% and median CPU 10.7% on the hot scan; phase-shift regresses, and both cases stay in the receipt.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/expertcache" target="_blank" rel="noopener">repo</a>
@@ -649,6 +666,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/pagedattn" target="_blank" rel="noopener">pagedattn</a></h4>
           <p class="inventory-claim"><strong>9/9</strong> parity cases <i>/</i> 3.0e-7 max err</p>
+          <p class="inventory-so">Same answer, different memory layout &mdash; 9/9 parity cases.</p>
           <p class="inventory-desc">Synthetic q/k/v on CPU torch: streaming paged attention vs dense gather, 9/9 parity cases, max abs error 3.0e-7. Parity, not a speed win; no CUDA claim.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/pagedattn" target="_blank" rel="noopener">repo</a>
@@ -671,6 +689,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/softfp8" target="_blank" rel="noopener">softfp8</a></h4>
           <p class="inventory-claim"><strong>2.0×</strong> weight bytes <i>/</i> 4.87% rel. error</p>
+          <p class="inventory-so">Half the memory, and the answers come out the same.</p>
           <p class="inventory-desc">W8 weight path, measured output error and a labelled bandwidth model.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/softfp8" target="_blank" rel="noopener">repo</a>
@@ -683,6 +702,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/latq" target="_blank" rel="noopener">latq</a></h4>
           <p class="inventory-claim"><strong>15.8×</strong> compression <i>/</i> 0.607 rel. error</p>
+          <p class="inventory-so">Four weights in the space of one, near the theoretical floor.</p>
           <p class="inventory-desc">D8/D4/Z2 lattice ladder from 4 to 1 bit per weight; the 1-bit point sits within 1% of the Gaussian R-D floor.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/latq" target="_blank" rel="noopener">repo</a>
@@ -695,6 +715,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/bithash" target="_blank" rel="noopener">bithash</a></h4>
           <p class="inventory-claim"><strong>3.98×</strong> compression <i>/</i> 4.02 bpw</p>
+          <p class="inventory-so">3.98&thinsp;&times;&thinsp;smaller weights from a 4-bit codebook.</p>
           <p class="inventory-desc">A four-bit codebook study: uniform16 beats odd16 on dense weight rows.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/bithash" target="_blank" rel="noopener">repo</a>
@@ -707,6 +728,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/bitforge" target="_blank" rel="noopener">bitforge</a></h4>
           <p class="inventory-claim"><strong>100%</strong> decidable argmax <i>/</i> 0.00239 max dev</p>
+          <p class="inventory-so">A 4-bit softmax still wins 100% of the decidable argmax calls.</p>
           <p class="inventory-desc">4-bit softmax path with 100% argmax agreement on decidable rows and 0.00239 max probability deviation; near ties are reported separately.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/bitforge" target="_blank" rel="noopener">repo</a>
@@ -729,6 +751,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/fusednorm" target="_blank" rel="noopener">fusednorm</a></h4>
           <p class="inventory-claim"><strong>33%</strong> less norm-site traffic</p>
+          <p class="inventory-so">Three trips to memory become one &mdash; 1&thinsp;MiB saved on every word.</p>
           <p class="inventory-desc">RMSNorm, residual, and SwiGLU epilogue fused into one pass; 1 MiB saved per LLaMA-3 8B decode token.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/fusednorm" target="_blank" rel="noopener">repo</a>
@@ -741,6 +764,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/gembench" target="_blank" rel="noopener">gembench</a></h4>
           <p class="inventory-claim"><strong>1.8×</strong> GEMV throughput <i>/</i> 64.7 ms</p>
+          <p class="inventory-so">The slow way, the easy way, and the fast way, on a plain CPU.</p>
           <p class="inventory-desc">A bandwidth-honest GEMV ladder: 119.2 ms naive rows vs 64.7 ms torch.mv, measured on CPU.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/gembench" target="_blank" rel="noopener">repo</a>
@@ -753,6 +777,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener">roofline-planner</a></h4>
           <p class="inventory-claim"><strong>34</strong> deployment plans <i>/</i> 5 models × 9 GPUs</p>
+          <p class="inventory-so">Will it fit, and how fast &mdash; 34 answers against one memory wall.</p>
           <p class="inventory-desc">Fit-check, roofline regime, and decode throughput for every plan.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener">repo</a>
@@ -766,6 +791,7 @@
           </div>
           <h4><a href="https://github.com/DastanZar/ring" target="_blank" rel="noopener">ring</a></h4>
           <p class="inventory-claim"><strong>2.01 GB/s</strong> busbw <i>/</i> 4 ranks</p>
+          <p class="inventory-so">A ring of four ranks reaches 2.01&thinsp;GB/s, then falls at eight.</p>
           <p class="inventory-desc">Five rank counts on loopback TCP: N=4 busbw 2.01 GB/s; N=8 falls to 0.99 GB/s. Formula-normalized, not NCCL or GPU scaling.</p>
           <div class="inventory-links">
             <a class="text-link" href="https://github.com/DastanZar/ring" target="_blank" rel="noopener">repo</a>
@@ -774,6 +800,70 @@
         </article>
       </div>
     </div>
+    </div>
+  </section>
+
+  <section class="section losses" id="losses">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-index">— / THE LOSSES</div>
+        <h2 class="section-title" data-split>What didn't <em>work.</em></h2>
+        <p class="section-note">Six experiments that regressed, published on purpose. A receipt you can trust is one that also shows the misses.</p>
+      </div>
+      <div class="loss-grid"><article class="loss-card reveal" data-ink-point data-ink-say="treetrace. we publish the loss too.">
+        <div class="loss-top"><span class="loss-no">01</span><a href="https://github.com/DastanZar/treetrace" target="_blank" rel="noopener">treetrace</a></div>
+        <dl class="loss-dl">
+          <div><dt>Tried</dt><dd>Pack a draft tree into one fast node pass.</dd></div>
+          <div><dt>Expected</dt><dd>the fast kernel carries the whole step.</dd></div>
+          <div><dt>Got</dt><dd>End to end it is only 1.06&thinsp;&times;&thinsp;; independent drafts accept 0 tokens.</dd></div>
+        </dl>
+        <a class="text-link" href="https://github.com/DastanZar/treetrace/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+      </article>
+<article class="loss-card reveal" data-ink-point data-ink-say="expertcache. we publish the loss too.">
+        <div class="loss-top"><span class="loss-no">02</span><a href="https://github.com/DastanZar/expertcache" target="_blank" rel="noopener">expertcache</a></div>
+        <dl class="loss-dl">
+          <div><dt>Tried</dt><dd>Rank expert cache entries by cost instead of recency.</dd></div>
+          <div><dt>Expected</dt><dd>fewer misses than plain LRU.</dd></div>
+          <div><dt>Got</dt><dd>On the phase-shift trace it regresses: 78 misses against 62 for LRU.</dd></div>
+        </dl>
+        <a class="text-link" href="https://github.com/DastanZar/expertcache/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+      </article>
+<article class="loss-card reveal" data-ink-point data-ink-say="roofline-planner. we publish the loss too.">
+        <div class="loss-top"><span class="loss-no">03</span><a href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener">roofline-planner</a></div>
+        <dl class="loss-dl">
+          <div><dt>Tried</dt><dd>Buy throughput by batching decode to 64 sequences.</dd></div>
+          <div><dt>Expected</dt><dd>total tokens per second should climb.</dd></div>
+          <div><dt>Got</dt><dd>Total throughput falls in 34 of 34 plans; worst case 0.33&thinsp;&times;&thinsp; the single-stream rate.</dd></div>
+        </dl>
+        <a class="text-link" href="https://github.com/DastanZar/roofline-planner/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+      </article>
+<article class="loss-card reveal" data-ink-point data-ink-say="sdecode. we publish the loss too.">
+        <div class="loss-top"><span class="loss-no">04</span><a href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">sdecode</a></div>
+        <dl class="loss-dl">
+          <div><dt>Tried</dt><dd>Let the drafter choose its own run length (adaptive K).</dd></div>
+          <div><dt>Expected</dt><dd>beat a fixed guess.</dd></div>
+          <div><dt>Got</dt><dd>Adaptive averaged 4.16&thinsp;&times;&thinsp; against 5.69&thinsp;&times;&thinsp; for fixed K=8 on this pair.</dd></div>
+        </dl>
+        <a class="text-link" href="https://github.com/DastanZar/sdecode/blob/main/receipts/real_run.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+      </article>
+<article class="loss-card reveal" data-ink-point data-ink-say="ring. we publish the loss too.">
+        <div class="loss-top"><span class="loss-no">05</span><a href="https://github.com/DastanZar/ring" target="_blank" rel="noopener">ring</a></div>
+        <dl class="loss-dl">
+          <div><dt>Tried</dt><dd>Add ranks to raise all-reduce bandwidth.</dd></div>
+          <div><dt>Expected</dt><dd>bandwidth should keep scaling.</dd></div>
+          <div><dt>Got</dt><dd>Bus bandwidth climbs to 2.01&thinsp;GB/s at four ranks, then falls to 0.99 at eight.</dd></div>
+        </dl>
+        <a class="text-link" href="https://github.com/DastanZar/ring/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+      </article>
+<article class="loss-card reveal" data-ink-point data-ink-say="pushdown. we publish the loss too.">
+        <div class="loss-top"><span class="loss-no">06</span><a href="https://github.com/DastanZar/pushdown" target="_blank" rel="noopener">pushdown</a></div>
+        <dl class="loss-dl">
+          <div><dt>Tried</dt><dd>Track a deep JSON stack with a pushdown automaton.</dd></div>
+          <div><dt>Expected</dt><dd>a production-ready structured-decoding mask.</dd></div>
+          <div><dt>Got</dt><dd>It keeps only 25 of 103 tokens at the value state &mdash; a teaching model, not a production DFA.</dd></div>
+        </dl>
+        <a class="text-link" href="https://github.com/DastanZar/pushdown/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+      </article></div>
     </div>
   </section>
 

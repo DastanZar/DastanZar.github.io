@@ -27,11 +27,28 @@ def write(name: str, var: str, data: object) -> None:
     print(f"{target.relative_to(ROOT)}: {len(payload):,} bytes")
 
 
+def kv_payload() -> dict:
+    pm = load("pagemem")
+    stamp = load("kvstamp")
+    attn = load("pagedattn")
+    return {
+        "allocator": pm["allocator"],
+        "policy_lab": pm["policy_lab"],
+        "stamp": stamp,
+        "attn": {
+            "parity_ok": attn["parity_ok"],
+            "cases": len(attn["cases"]),
+            "max_abs_error": max(c["max_abs_error"] for c in attn["cases"]),
+        },
+    }
+
+
 def main() -> None:
     write("sdecode", "SDECODE_DATA", load("sdecode_real_run"))
     write("pagemem", "PAGEMEM_DATA", load("pagemem"))
     write("cplan", "CPLAN_DATA", load("cplan"))
     write("roofline-planner", "ROOFLINE_DATA", load("roofline-planner"))
+    write("kvdesk", "KV_DATA", kv_payload())
 
 
 if __name__ == "__main__":

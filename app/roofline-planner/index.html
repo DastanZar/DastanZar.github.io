@@ -59,6 +59,31 @@
       font-weight: 500;
     }
 
+    .price-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--muted);
+      font: 9px var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .price-field input {
+      width: 96px;
+      padding: 6px 8px;
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      color: var(--ink);
+      font: 12px var(--mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .price-field input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
     .desk {
       display: grid;
       grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.5fr);
@@ -465,6 +490,10 @@
       <div class="seg" id="gpuSeg" role="group" aria-label="GPU"></div>
       <div class="plan-sub" id="planSub">—</div>
     </div>
+    <label class="price-field" for="priceHr">
+      <span>assumed $ / GPU-hr</span>
+      <input id="priceHr" type="number" min="0" step="0.5" value="2" inputmode="decimal" aria-label="Assumed dollars per GPU hour, used for the cost column">
+    </label>
   </section>
 
   <section class="desk">
@@ -501,6 +530,7 @@
         <div class="ledger-row2"><dt>Roofline knee</dt><dd id="lRidge">—<small>FLOP/byte</small></dd></div>
         <div class="ledger-row2"><dt>Decode / bs=1</dt><dd id="lTps1">—<small>tokens per second, 1 sequence</small></dd></div>
         <div class="ledger-row2"><dt>Decode / bs=64</dt><dd id="lTps64">—<small>total tokens per second, 64 sequences</small></dd></div>
+        <div class="ledger-row2"><dt>Cost / M tokens</dt><dd class="accent" id="lCost">—<small>at bs=1 throughput; price assumed</small></dd></div>
         <div class="ledger-row2"><dt>Prefill</dt><dd id="lPrefill">—<small>per 1K tokens</small></dd></div>
         <div class="ledger-row2"><dt>KV per token</dt><dd id="lKv">—<small>bytes, per token per layer-pair context</small></dd></div>
       </dl>
@@ -542,6 +572,7 @@
           <th class="num">VRAM / GB</th>
           <th class="num">tok/s bs=1</th>
           <th class="num">tok/s bs=64</th>
+          <th class="num">≈ $/M bs=1</th>
           <th class="num">bs* knee</th>
           <th class="muted-t">Fit</th>
         </tr>
@@ -553,7 +584,8 @@
   <div class="receipt-note">
     <span>Source <b>receipts/receipt.json</b></span>
     <span><b>34 plans</b> / 5 models x 9 GPUs / FP16 / 4K context</span>
-    <span>Derived here: <b>knee gap</b>, <b>spare %</b>, <b>batch ratio</b></span>
+    <span>Derived here: <b>knee gap</b>, <b>spare %</b>, <b>batch ratio</b>, <b>$ / M tokens</b></span>
+    <span>Throughput is measured; the $ / GPU-hr price is your assumption</span>
     <a href="https://github.com/DastanZar/roofline-planner/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Open receipt ↗</a>
   </div>
 </main>
@@ -579,6 +611,14 @@
     maximumFractionDigits: digits, minimumFractionDigits: digits,
   });
   const plan = () => PLANS.find((p) => p.model === st.model && p.gpu === st.gpu);
+
+  // Cost is derived: measured throughput over an assumed, editable price.
+  const pricePerHour = () => {
+    const v = parseFloat($("priceHr").value);
+    return Number.isFinite(v) && v >= 0 ? v : 0;
+  };
+  const costPerMillion = (tps) => pricePerHour() * 1e6 / (tps * 3600);
+  const fmtCost = (c) => `$${c < 1 ? c.toFixed(3) : c.toFixed(2)}`;
 
   // --- roofline sketch (log AI axis: 0.01 .. 10,000) ---
   // Shape of the roofline: the slope and the knee position are receipt-derived,
@@ -623,9 +663,9 @@
       <line x1="${aiX.toFixed(1)}" y1="${aiY}" x2="${aiX.toFixed(1)}" y2="${baseY}" stroke="#141511" stroke-dasharray="2 3" stroke-opacity="0.7"/>
       <circle cx="${aiX.toFixed(1)}" cy="${aiY.toFixed(1)}" r="4.6" fill="#141511"/>
       <text x="${aiX.toFixed(1)}" y="${baseY + 30}" text-anchor="middle" class="svg-label svg-ink">PLAN b=1 / ${ai.toFixed(3)}</text>
-      <line x1="${bX.toFixed(1)}" y1="${R_TOP + 26}" x2="${bX.toFixed(1)}" y2="${baseY}" stroke="#E9491B" stroke-dasharray="3 4" stroke-opacity="0.6"/>
       <circle cx="${bX.toFixed(1)}" cy="${plateauY}" r="3.8" fill="none" stroke="#E9491B" stroke-width="1.8"/>
-      <text x="${bX.toFixed(1)}" y="${R_TOP + 16}" text-anchor="${bX > 470 ? "end" : "start"}" class="svg-label svg-accent">b=${fmt(bstar)} COMPUTE KNEE</text>
+      <text x="${bX.toFixed(1)}" y="${plateauY + 18}" text-anchor="${bX > 540 ? "end" : "start"}" class="svg-label svg-accent">b=${fmt(bstar)} COMPUTE KNEE</text>
+      <line x1="${bX.toFixed(1)}" y1="${plateauY + 26}" x2="${bX.toFixed(1)}" y2="${baseY}" stroke="#E9491B" stroke-dasharray="3 4" stroke-opacity="0.6"/>
       <text x="${R_RIGHT}" y="${baseY + 48}" text-anchor="end" class="svg-label">ARITHMETIC INTENSITY / FLOP PER BYTE (LOG)</text>
     </svg>`;
   }
@@ -690,6 +730,7 @@
     $("lRidge").innerHTML = `${r.ridge_intensity_flops_per_byte.toFixed(1)}<small>FLOP/byte (${fmt(r.weight_gqa, 0)}x GQA weight)</small>`;
     $("lTps1").innerHTML = `${p.decode.tokens_per_sec_b1.toFixed(1)}<small>tokens per second, 1 sequence</small>`;
     $("lTps64").innerHTML = `${p.decode.tokens_per_sec_b64_total.toFixed(1)}<small>${(p.decode.tokens_per_sec_b64_total / p.decode.tokens_per_sec_b1).toFixed(2)}x the bs=1 rate (derived)</small>`;
+    $("lCost").innerHTML = `${fmtCost(costPerMillion(p.decode.tokens_per_sec_b1))}<small>per million tokens at bs=1 &middot; $${pricePerHour().toFixed(2)}/GPU-hr assumed</small>`;
     $("lPrefill").innerHTML = `${p.prefill.ms_per_1k_tokens.toFixed(1)} ms<small>8K: ${p.prefill.ms_per_8k_tokens.toFixed(0)} ms</small>`;
     $("lKv").innerHTML = `${fmt(p.kv_bytes_per_token / 1024)} KiB<small>per token · ${fmt(p.context)} ctx · KV ${p.kv_bits}-bit</small>`;
   }
@@ -725,6 +766,7 @@
         + `<td class="num">${vramText(p)}</td>`
         + `<td class="num">${p.decode.tokens_per_sec_b1.toFixed(1)}</td>`
         + `<td class="num">${p.decode.tokens_per_sec_b64_total.toFixed(1)}</td>`
+        + `<td class="num">${fmtCost(costPerMillion(p.decode.tokens_per_sec_b1))}</td>`
         + `<td class="num">${fmt(p.roofline.ridge_batch_b_star)}</td>`
         + `<td><span class="fit-dot" title="fits from receipt"></span>yes</td>`;
       const pick = () => { st.model = p.model; st.gpu = p.gpu; render(); };
@@ -748,6 +790,8 @@
     renderTable();
     renderSelects();
   }
+
+  $("priceHr").addEventListener("input", render);
 
   render();
 })();

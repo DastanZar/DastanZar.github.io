@@ -188,6 +188,27 @@ tt_ind = next(c for c in treetrace["cases"] if c["case"] == "independent_draft")
 tt_node_x = tt_near["node_sequential_ms"] / tt_near["node_packed_ms"]
 tt_total_x = tt_near["sequential_ms"] / tt_near["packed_ms"]
 
+# Extra views for the translation layer and the "losses" band.
+ec_ps_lru = next(
+    c for c in expertcache["cases"]
+    if c["trace"] == "phase_shift" and c["capacity_bytes"] == 18144 and c["policy"] == "lru"
+)
+ec_ps_cost2q = next(
+    c for c in expertcache["cases"]
+    if c["trace"] == "phase_shift" and c["capacity_bytes"] == 18144 and c["policy"] == "cost2q"
+)
+
+rl_batch = {
+    k: v["decode"]["tokens_per_sec_b64_total"] / v["decode"]["tokens_per_sec_b1"]
+    for k, v in roofline.items()
+}
+rl_batch_worst = min(rl_batch.values())
+rl_batch_worst_key = min(rl_batch, key=rl_batch.get)
+rl_batch_regress = sum(1 for r in rl_batch.values() if r < 1.0)
+
+pd_kept = pd_value["kept"]
+pd_vocab = pd_value["vocab_size"]
+
 # Guardrails: fail the build if the receipts stop saying what the page says.
 assert sd_tpc > 2.0 and sd_c < 0.7
 assert sd_match, "sdecode token identity check failed"
@@ -330,6 +351,33 @@ for project in projects:
 
 project_by_slug = {p["slug"]: p for p in projects}
 receipt_slugs = [p["slug"] for p in projects]
+
+# ---------------------------------------------------------------------------
+# The translation layer: one plain-language consequence per project, so a
+# reader who does not work in ML still gets what the number is worth.
+# ---------------------------------------------------------------------------
+consequences = {
+    "sdecode": "Six words per slow step, instead of one.",
+    "pagemem": "The same card holds about 2.5&thinsp;&times;&thinsp;more conversations.",
+    "cplan": "The wait for the first word falls by 94%.",
+    "softfp8": "Half the memory, and the answers come out the same.",
+    "latq": "Four weights in the space of one, near the theoretical floor.",
+    "fusednorm": "Three trips to memory become one &mdash; 1&thinsp;MiB saved on every word.",
+    "kvstamp": "An eighth of the attention memory, if you keep the right tokens.",
+    "roofline-planner": f"Will it fit, and how fast &mdash; {rl_count} answers against one memory wall.",
+    "gembench": "The slow way, the easy way, and the fast way, on a plain CPU.",
+    "bithash": f"{bh_x:.2f}&thinsp;&times;&thinsp;smaller weights from a 4-bit codebook.",
+    "treetrace": f"A kernel {tt_node_x:.1f}&thinsp;&times;&thinsp;faster that only moves the finish line {tt_total_x:.2f}&thinsp;&times;.",
+    "pushdown": f"One gate token in {pd_vocab} passes; the JSON value state keeps only {pd_kept}.",
+    "streamdetok": "Text streams without ever splitting a character in half.",
+    "chunkpipe": "Long inputs are cut into chunks so nobody waits behind one giant job.",
+    "gatekeeper": "A bouncer that keeps the queue calm by turning away the flood.",
+    "radixlite": "Similar questions route to the same worker and reuse the prefill.",
+    "expertcache": "Cache the experts you actually use &mdash; while the pattern holds.",
+    "pagedattn": f"Same answer, different memory layout &mdash; {pa_cases}/{pa_cases} parity cases.",
+    "bitforge": f"A 4-bit softmax still wins {bf_argmax:.0f}% of the decidable argmax calls.",
+    "ring": f"A ring of four ranks reaches {ring4['busbw_gbps']:.2f}&thinsp;GB/s, then falls at eight.",
+}
 
 
 def repo_url(slug: str) -> str:
@@ -487,6 +535,7 @@ assert len(inventory_slugs) == 20 and len(set(inventory_slugs)) == 20
 assert set(inventory_slugs) == set(project_by_slug) | set(inventory_custom)
 assert all(len(slugs) == 4 for _, slugs in inventory_specs)
 assert set(APP_PATHS) <= set(inventory_slugs)
+assert set(consequences) == set(inventory_slugs), "every card needs a plain-language line"
 
 
 def inventory_meta() -> str:
@@ -496,7 +545,8 @@ def inventory_meta() -> str:
       <div><b>{len(inventory_themes):02d}</b><span>themes</span></div>
       <div><b>{len(inventory_slugs)}</b><span>receipt links</span></div>
       <div><b>{apps:02d}</b><span>live apps</span></div>
-    </div>"""
+    </div>
+    <p class="inventory-launch reveal">New here? Start with <a class="text-link strong" href="app/kvdesk/index.html" target="_blank" rel="noopener">the KV desk <span aria-hidden="true">↗</span></a> — one interactive tour of attention memory, built from three receipts.</p>"""
 
 
 def inventory_cards() -> str:
@@ -539,6 +589,7 @@ def inventory_cards() -> str:
           </div>
           <h4><a href="{repo_url(slug)}" target="_blank" rel="noopener">{name}</a></h4>
           <p class="inventory-claim">{claim}</p>
+          <p class="inventory-so">{consequences[slug]}</p>
           <p class="inventory-desc">{description}</p>
           <div class="inventory-links">
             {links}
@@ -690,6 +741,7 @@ def hero_facts() -> str:
     facts = [
         ("CASE FILES", f"{len(projects)} on this page"),
         ("INVENTORY", f"{len(inventory_slugs)} public repos"),
+        ("MEASURED ON", "CPU only"),
         ("GPU CLAIMS", "0 unlabeled"),
         ("RECEIPTS", f"{len(inventory_slugs)} linked"),
     ]
@@ -704,6 +756,7 @@ def featured_sdecode() -> str:
     <div class="case-meta"><span class="case-no">01</span><span>Speculative decoding</span><span>2026</span></div>
     <h3>sdecode</h3>
     <p class="case-claim"><strong>{fmt(sd_tpc)}×</strong> tokens per target call<span class="case-period">.</span></p>
+    <p class="case-so">{consequences['sdecode']}</p>
     <p class="case-desc">A measured draft/verify harness for real models: a smaller drafter proposes, the target verifies a batch, and every lane is checked token-for-token against the naive target. The receipt keeps the wins and the losses.</p>
     <dl class="specs">
       <div class="spec"><dt>TARGET / DRAFTER</dt><dd>gpt2 / distilgpt2</dd></div>
@@ -760,6 +813,7 @@ def mini_case(
     {svg}
   </div>
   <p class="case-claim"><strong>{claim_html}</strong></p>
+  <p class="case-so">{consequences[slug]}</p>
   <p class="case-desc">{description}</p>
   <div class="case-links">
     <a class="text-link strong" href="{repo_url(slug)}" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
@@ -811,6 +865,73 @@ def shipping_rows() -> str:
     return "\n".join(rows)
 
 
+def losses() -> str:
+    items = [
+        {
+            "no": "01",
+            "name": "treetrace",
+            "tried": "Pack a draft tree into one fast node pass.",
+            "expected": "the fast kernel carries the whole step.",
+            "actual": f"End to end it is only {tt_total_x:.2f}&thinsp;&times;&thinsp;; independent drafts accept {tt_ind['accepted']:.0f} tokens.",
+            "slug": "treetrace",
+        },
+        {
+            "no": "02",
+            "name": "expertcache",
+            "tried": "Rank expert cache entries by cost instead of recency.",
+            "expected": "fewer misses than plain LRU.",
+            "actual": f"On the phase-shift trace it regresses: {ec_ps_cost2q['misses']:.0f} misses against {ec_ps_lru['misses']:.0f} for LRU.",
+            "slug": "expertcache",
+        },
+        {
+            "no": "03",
+            "name": "roofline-planner",
+            "tried": "Buy throughput by batching decode to 64 sequences.",
+            "expected": "total tokens per second should climb.",
+            "actual": f"Total throughput falls in {rl_batch_regress} of {rl_count} plans; worst case {rl_batch_worst:.2f}&thinsp;&times;&thinsp; the single-stream rate.",
+            "slug": "roofline-planner",
+        },
+        {
+            "no": "04",
+            "name": "sdecode",
+            "tried": "Let the drafter choose its own run length (adaptive K).",
+            "expected": "beat a fixed guess.",
+            "actual": f"Adaptive averaged {fmt(sd_adaptive)}&thinsp;&times;&thinsp; against {fmt(sd_tpc)}&thinsp;&times;&thinsp; for fixed K=8 on this pair.",
+            "slug": "sdecode",
+        },
+        {
+            "no": "05",
+            "name": "ring",
+            "tried": "Add ranks to raise all-reduce bandwidth.",
+            "expected": "bandwidth should keep scaling.",
+            "actual": f"Bus bandwidth climbs to {ring4['busbw_gbps']:.2f}&thinsp;GB/s at four ranks, then falls to {ring8['busbw_gbps']:.2f} at eight.",
+            "slug": "ring",
+        },
+        {
+            "no": "06",
+            "name": "pushdown",
+            "tried": "Track a deep JSON stack with a pushdown automaton.",
+            "expected": "a production-ready structured-decoding mask.",
+            "actual": f"It keeps only {pd_kept} of {pd_vocab} tokens at the value state &mdash; a teaching model, not a production DFA.",
+            "slug": "pushdown",
+        },
+    ]
+    cards = []
+    for item in items:
+        cards.append(
+            f"""<article class="loss-card reveal" data-ink-point data-ink-say="{item['name']}. we publish the loss too.">
+        <div class="loss-top"><span class="loss-no">{item['no']}</span><a href="{repo_url(item['slug'])}" target="_blank" rel="noopener">{item['name']}</a></div>
+        <dl class="loss-dl">
+          <div><dt>Tried</dt><dd>{item['tried']}</dd></div>
+          <div><dt>Expected</dt><dd>{item['expected']}</dd></div>
+          <div><dt>Got</dt><dd>{item['actual']}</dd></div>
+        </dl>
+        <a class="text-link" href="{receipt_url(item['slug'])}" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+      </article>"""
+        )
+    return "\n".join(cards)
+
+
 def receipt_tabs() -> str:
     return "".join(
         f'<button class="tab" type="button" role="tab" aria-selected="false" data-receipt="{slug}">{project_by_slug[slug]["name"]}</button>'
@@ -853,6 +974,7 @@ replacements = {
     "CASE_DUO": case_duo,
     "SHIP_ROWS": shipping_rows(),
     "INVENTORY": inventory_meta() + "\n" + inventory_cards(),
+    "LOSSES": losses(),
     "RECEIPT_TABS": receipt_tabs(),
     "MASCOT": mascot,
     "YEAR": "2026",
@@ -875,4 +997,5 @@ print(f"sdecode: {sd_tpc:.3f} tok/call, c={sd_c:.3f}, adaptive={sd_adaptive:.3f}
 print(f"pagemem: {pm_paged}/{pm_base} blocks ({pm_saved})")
 print(f"cplan: reference TTFT improvement {cp_peak['improvement']}% at {cp_peak['rate']}/s")
 print(f"inventory: {len(inventory_slugs)} cards, {len(inventory_themes)} themes, {len(APP_PATHS)} apps")
+print(f"losses: {rl_batch_regress}/{rl_count} plans regress at bs=64; worst {rl_batch_worst:.2f}x")
 print(f"receipts: {len(payload)} files embedded")

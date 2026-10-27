@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="kv desk: four measured ways to spend less attention memory — share the prefix, keep the tokens that matter, prune the budget, compress the rest.">
+  <title>kv desk — the memory dial</title>
+  <link rel="stylesheet" href="../_base.css">
+  <script src="data.js"></script>
+  <style>
+    .kvdesk .scenario h1 {
+      max-width: 940px;
+    }
+
+    .kvdesk .lede {
+      max-width: 720px;
+      margin-top: 20px;
+      color: var(--ink-soft);
+      font-size: clamp(16px, 1.5vw, 19px);
+      line-height: 1.45;
+    }
+
+    .kvdesk .lede b {
+      font-weight: 600;
+    }
+
+    .desk-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 0 16px;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kv-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 22px;
+      border: 1px solid var(--line-strong);
+      background: var(--line-strong);
+    }
+
+    .kv-panel {
+      display: flex;
+      min-height: 340px;
+      flex-direction: column;
+      gap: 15px;
+      padding: 20px 20px 18px;
+      background: var(--paper-2);
+    }
+
+    .kv-panel-head {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      padding-bottom: 11px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kv-no {
+      flex: none;
+      color: var(--accent-dark);
+      font: 10px var(--mono);
+      letter-spacing: 0.1em;
+    }
+
+    .kv-panel-head h2 {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 31px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .kv-panel-head p {
+      margin: 5px 0 0;
+      max-width: 46ch;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .kv-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .kv-controls button {
+      padding: 6px 11px;
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      color: var(--ink);
+      font: 10px var(--mono);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+
+    .kv-controls button:hover,
+    .kv-controls button:focus-visible {
+      border-color: var(--accent);
+    }
+
+    .kv-controls button[aria-pressed="true"] {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .kv-readout {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .kv-readout b {
+      color: var(--ink);
+      font: 500 clamp(34px, 4.4vw, 56px) / 1 var(--mono);
+      letter-spacing: -0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kv-readout b.accent { color: var(--accent-dark); }
+
+    .kv-readout span {
+      max-width: 22ch;
+      color: var(--muted);
+      font: 9px / 1.4 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .kv-viz {
+      margin-top: auto;
+    }
+
+    .kv-bar {
+      position: relative;
+      height: 30px;
+      margin-top: 6px;
+      border: 1px solid var(--line);
+      background: var(--paper-3);
+    }
+
+    .kv-bar i {
+      display: block;
+      height: 100%;
+      background: var(--ink);
+      transition: width 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .kv-bar.is-accent i { background: var(--accent); }
+    .kv-bar.is-ghost i { background: rgba(20, 21, 17, 0.2); }
+
+    .kv-bar-label {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      color: var(--muted);
+      font: 9px var(--mono);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .kv-bar-label b {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .kv-slider {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .kv-slider input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .kv-slider .kv-bar-label b { color: var(--accent-dark); }
+
+    .kv-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-top: 4px;
+    }
+
+    .kv-svg-label {
+      font-family: var(--mono);
+      font-size: 8.4px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      fill: var(--muted);
+    }
+
+    .kv-note {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .kv-note b { color: var(--ink); font-weight: 500; }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+      gap: clamp(20px, 4vw, 60px);
+      align-items: start;
+      margin-top: 20px;
+      padding: 24px 0 30px;
+      border-top: 1px solid var(--ink);
+    }
+
+    .decision h2 {
+      max-width: 860px;
+      font-family: var(--serif);
+      font-size: clamp(30px, 4.2vw, 55px);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+      line-height: 1;
+    }
+
+    .decision h2 em { color: var(--accent); font-style: italic; }
+
+    .decision p {
+      margin-top: 13px;
+      max-width: 660px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .decision-figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding-top: 5px;
+    }
+
+    .decision-figure {
+      padding-top: 8px;
+      border-top: 1px solid var(--ink);
+    }
+
+    .decision-figure strong {
+      display: block;
+      font: 500 clamp(22px, 2.4vw, 32px) / 1 var(--mono);
+      letter-spacing: -0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .decision-figure span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font: 9px / 1.35 var(--mono);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .decision-figure.accent strong { color: var(--accent-dark); }
+
+    @media (max-width: 900px) {
+      .kv-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .decision { grid-template-columns: 1fr; }
+      .decision-figures { max-width: 460px; }
+    }
+  </style>
+</head>
+<body class="kvdesk">
+
+<header class="masthead">
+  <a class="brand" href="../../index.html"><span>DASTANZAR</span> / MLSYS</a>
+  <nav aria-label="Project navigation">
+    <a href="../../index.html">Portfolio</a>
+    <a href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">Repo ↗</a>
+    <a href="https://github.com/DastanZar/kvstamp/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Receipt ↗</a>
+  </nav>
+</header>
+
+<main class="shell">
+
+  <section class="scenario">
+    <div>
+      <div class="kicker"><span class="rule"></span><span class="label">kv desk / attention memory</span></div>
+      <h1>Spend less <em>attention memory.</em></h1>
+      <p class="lede">Every token a model reads back is stored — the <b>KV cache</b>. It is usually the thing that runs a GPU out of memory first. Four measured moves make it smaller: <b>share</b> what repeats, <b>keep</b> the tokens that matter, <b>prune</b> the budget, and <b>compress</b> the rest. One budget, three receipts.</p>
+    </div>
+    <div class="brief">
+      <div class="label">The decision</div>
+      <p>Where does the memory go, what does cutting it cost in accuracy, and which move is free?</p>
+      <div class="stamp">receipts / pagemem · kvstamp · pagedattn</div>
+    </div>
+  </section>
+
+  <section class="desk-toolbar" aria-label="KV desk summary">
+    <div class="kicker"><span class="rule"></span><span class="label">all values read from committed receipts</span></div>
+    <div class="plan-sub" id="deskSub">share → choose → prune → compress</div>
+  </section>
+
+  <section class="kv-grid" aria-label="Four moves on attention memory">
+
+    <article class="kv-panel" id="panelShare">
+      <div class="kv-panel-head">
+        <span class="kv-no">01</span>
+        <div>
+          <h2>Share</h2>
+          <p>Eight conversations share one 512-token system prompt. If each reserves the whole prompt, that is 504 blocks. Paged allocation stores the shared prefix once.</p>
+        </div>
+      </div>
+      <div class="kv-controls" role="group" aria-label="Allocation">
+        <button type="button" data-alloc="prealloc" aria-pressed="false">Preallocated</button>
+        <button type="button" data-alloc="paged" aria-pressed="true">Paged + shared</button>
+      </div>
+      <div class="kv-readout">
+        <b id="shareBlocks">204</b>
+        <span>blocks to hold eight conversations</span>
+      </div>
+      <div class="kv-viz">
+        <div class="kv-bar is-ghost" style="height:22px"><i data-bar="prealloc" style="width:100%"></i></div>
+        <div class="kv-bar-label"><span>preallocated</span><b id="shareBaseLbl">504 blocks</b></div>
+        <div class="kv-bar is-accent" style="height:22px"><i data-bar="paged" style="width:40.5%"></i></div>
+        <div class="kv-bar-label"><span>paged + shared</span><b id="sharePagedLbl">204 blocks</b></div>
+        <p class="kv-note" id="shareNote">Prefix hit rate 100%; external fragmentation 0.98%. Savings: <b>59.5%</b> fewer blocks.</p>
+      </div>
+    </article>
+
+    <article class="kv-panel" id="panelChoose">
+      <div class="kv-panel-head">
+        <span class="kv-no">02</span>
+        <div>
+          <h2>Choose</h2>
+          <p>When memory is tight you keep a fixed number of tokens and drop the rest. <em>Which</em> ones you keep is the whole game: at the same 256-token budget the policy decides how much future attention survives.</p>
+        </div>
+      </div>
+      <div class="kv-controls" role="group" aria-label="Eviction policy">
+        <button type="button" data-policy="lru" aria-pressed="false">LRU</button>
+        <button type="button" data-policy="h2o" aria-pressed="true">H2O</button>
+        <button type="button" data-policy="sink_window" aria-pressed="false">Sink + window</button>
+      </div>
+      <div class="kv-readout">
+        <b class="accent" id="chooseRetained">96.4%</b>
+        <span>of future attention retained at 256 kept</span>
+      </div>
+      <div class="kv-viz" id="chooseViz">
+        <div class="kv-bar is-ghost" style="height:16px"><i style="width:16.5%"></i></div>
+        <div class="kv-bar-label"><span>lru</span><b>16.5%</b></div>
+        <div class="kv-bar is-accent" style="height:16px"><i style="width:96.4%"></i></div>
+        <div class="kv-bar-label"><span>h2o</span><b>96.4%</b></div>
+        <div class="kv-bar is-ghost" style="height:16px"><i style="width:37.9%"></i></div>
+        <div class="kv-bar-label"><span>sink + window</span><b>37.9%</b></div>
+      </div>
+    </article>
+
+    <article class="kv-panel" id="panelPrune">
+      <div class="kv-panel-head">
+        <span class="kv-no">03</span>
+        <div>
+          <h2>Prune</h2>
+          <p>Compression is a budget, not a free lunch. Keep fewer tokens and the output drifts. Drag the budget and watch the error knee appear.</p>
+        </div>
+      </div>
+      <div class="kv-slider">
+        <input id="budgetRange" type="range" min="0" max="4" step="1" value="3" aria-label="KV budget, from 32 to 512 tokens kept">
+        <div class="kv-bar-label"><span id="pruneBudgetLbl">budget 256 / 512</span><b id="pruneKeptLbl">kept 50.0%</b></div>
+      </div>
+      <div class="kv-readout">
+        <b class="accent" id="pruneError">0.383</b>
+        <span>relative output error</span>
+      </div>
+      <div class="kv-viz">
+        <svg class="kv-svg" id="pruneSvg" viewBox="0 0 300 120" role="img" aria-label="Relative output error against kept fraction across the budget sweep"></svg>
+        <p class="kv-note" id="pruneNote">At this budget the cache is <b>2.0×</b> smaller (derived from kept fraction). Full FP16 KV is 128 KiB; here it is <b>64 KiB</b> (derived).</p>
+      </div>
+    </article>
+
+    <article class="kv-panel" id="panelCompress">
+      <div class="kv-panel-head">
+        <span class="kv-no">04</span>
+        <div>
+          <h2>Compress</h2>
+          <p>Prune first, then store what is left in fewer bits. At a 64-token budget the KV cache drops from 128 KiB to 16 KiB — an 8× cut.</p>
+        </div>
+      </div>
+      <div class="kv-readout">
+        <b class="accent">8.0×</b>
+        <span>smaller KV cache at budget 64 / 512</span>
+      </div>
+      <div class="kv-viz">
+        <div class="kv-bar is-ghost" style="height:24px"><i style="width:100%"></i></div>
+        <div class="kv-bar-label"><span>full fp16</span><b>128 KiB</b></div>
+        <div class="kv-bar is-accent" style="height:24px"><i style="width:12.5%"></i></div>
+        <div class="kv-bar-label"><span>at budget 64</span><b>16 KiB</b></div>
+        <p class="kv-note">The layout is the cheap part to change: streaming paged attention matched dense attention on <b>9/9</b> parity cases at a max absolute error of <b>2.4e-7</b>. Same answer, different memory layout.</p>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="decision" aria-label="KV desk read">
+    <div>
+      <div class="label">The read</div>
+      <h2 id="decisionHeadline">Share the prefix first — it is <em>free.</em></h2>
+      <p id="decisionBody">Sharing the repeated system prompt cuts the block count 59.5% with no accuracy cost. Pruning and compression are where accuracy is spent, so they come second. And the choice of policy — not just the budget — moves retained attention from 16.5% to 96.4%.</p>
+    </div>
+    <div class="decision-figures">
+      <div class="decision-figure accent">
+        <strong>59.5%</strong>
+        <span>fewer blocks from sharing (free)</span>
+      </div>
+      <div class="decision-figure">
+        <strong>5.8×</strong>
+        <span>attention retained: best policy vs worst (derived)</span>
+      </div>
+      <div class="decision-figure">
+        <strong>8.0×</strong>
+        <span>smaller KV at budget 64</span>
+      </div>
+      <div class="decision-figure">
+        <strong>9/9</strong>
+        <span>paged-attention parity cases</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="receipt-note">
+    <span>Sources <b>pagemem</b> · <b>kvstamp</b> · <b>pagedattn</b> receipts</span>
+    <span>Exact: blocks, retained attention, kept fraction, output error, parity</span>
+    <span>Derived here: <b>bytes</b>, <b>compression</b>, <b>policy ratio</b></span>
+    <a href="https://github.com/DastanZar/kvstamp/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Open receipt ↗</a>
+  </div>
+</main>
+
+<footer class="footer">
+  <span>kv desk / attention memory</span>
+  <span>Every number is a committed receipt value; only ratios and byte conversions over those values are derived, and they are labelled.</span>
+</footer>
+
+<script>
+(() => {
+  const D = window.KV_DATA || {};
+  const A = D.allocator || {};
+  const P = D.policy_lab || {};
+  const S = D.stamp || {};
+  const $ = (id) => document.getElementById(id);
+
+  const pct = (x, d = 1) => `${(x * 100).toFixed(d)}%`;
+  const fullBytes = S.kv_bytes_full_fp16 || 131072;
+
+  // ---- 01 share -----------------------------------------------------------
+  const setAlloc = (mode) => {
+    const paged = mode === "paged";
+    document.querySelectorAll("[data-alloc]").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.alloc === mode)));
+    $("shareBlocks").textContent = paged ? A.blocks_paged : A.blocks_preallocated_baseline;
+    document.querySelector('[data-bar="paged"]').style.width =
+      `${(paged ? A.blocks_paged / A.blocks_preallocated_baseline : 1) * 100}%`;
+    document.querySelector('[data-bar="prealloc"]').style.width =
+      `${paged ? 0 : 100}%`;
+    $("shareNote").innerHTML = paged
+      ? `Prefix hit rate ${pct(A.prefix_hit_rate, 0)}; external fragmentation ${pct(A.external_fragmentation, 2)}. Savings: <b>${A.savings}</b> fewer blocks.`
+      : `Each conversation reserves the full ${A.shared_system_prompt_tokens}-token prefix: ${A.blocks_preallocated_baseline} blocks, no sharing.`;
+  };
+  document.querySelectorAll("[data-alloc]").forEach((b) =>
+    b.addEventListener("click", () => setAlloc(b.dataset.alloc)));
+
+  // ---- 02 choose ----------------------------------------------------------
+  const setPolicy = (key) => {
+    document.querySelectorAll("[data-policy]").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.policy === key)));
+    const r = (P[key] && P[key].retained_future_attention) || 0;
+    $("chooseRetained").textContent = pct(r, 1);
+  };
+  document.querySelectorAll("[data-policy]").forEach((b) =>
+    b.addEventListener("click", () => setPolicy(b.dataset.policy)));
+
+  // ---- 03 prune -----------------------------------------------------------
+  const sweep = Object.entries(S.sweep || {}).map(([k, v]) => ({
+    budget: parseInt(k.split("=")[1].split("/")[0], 10),
+    kept: v.kept_fraction,
+    err: v.relative_output_error,
+  })).sort((a, b) => a.kept - b.kept);
+  const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+  const maxErr = Math.max(...sweep.map((p) => p.err), 0.0001);
+
+  const drawPrune = (active) => {
+    const W = 300, H = 120, L = 34, R = 12, T = 14, B = 26;
+    const pw = W - L - R, ph = H - T - B;
+    const x = (kept) => L + (kept) * pw;
+    const y = (err) => T + ph - (err / maxErr) * ph;
+    const pts = sweep.map((p) => `${x(p.kept).toFixed(1)},${y(p.err).toFixed(1)}`).join(" ");
+    let grid = "";
+    for (const g of [0, 0.5, 1]) {
+      const gy = T + ph - g * ph;
+      grid += `<line x1="${L}" y1="${gy.toFixed(1)}" x2="${W - R}" y2="${gy.toFixed(1)}" stroke="#141511" stroke-opacity=".1" stroke-dasharray="2 4"/>`
+        + `<text x="${L - 6}" y="${(gy + 3).toFixed(1)}" text-anchor="end" class="kv-svg-label">${(g * maxErr).toFixed(2)}</text>`;
+    }
+    const dots = sweep.map((p) => {
+      const on = p.budget === active.budget;
+      return `<circle cx="${x(p.kept).toFixed(1)}" cy="${y(p.err).toFixed(1)}" r="${on ? 4.6 : 2.4}" fill="${on ? "#E9491B" : "#141511"}" />`;
+    }).join("");
+    $("pruneSvg").innerHTML = `
+      ${grid}
+      <polyline points="${pts}" fill="none" stroke="#141511" stroke-width="1.6"/>
+      ${dots}
+      <text x="${L}" y="${H - 7}" class="kv-svg-label">kept fraction →</text>
+      <text x="${W - R}" y="${H - 7}" text-anchor="end" class="kv-svg-label">output error ↑</text>
+      <circle cx="${x(active.kept).toFixed(1)}" cy="${y(active.err).toFixed(1)}" r="7.5" fill="none" stroke="#E9491B" stroke-width="1.4" opacity=".5"/>`;
+  };
+
+  const setBudget = (index) => {
+    const p = sweep[clamp(index, 0, sweep.length - 1)];
+    $("pruneBudgetLbl").textContent = `budget ${p.budget} / ${S.context_tokens || 512}`;
+    $("pruneKeptLbl").textContent = `kept ${pct(p.kept, 1)}`;
+    $("pruneError").textContent = p.err.toFixed(3);
+    const bytes = fullBytes * p.kept;
+    const comp = 1 / p.kept;
+    $("pruneNote").innerHTML = `At this budget the cache is <b>${comp.toFixed(1)}×</b> smaller (derived from kept fraction). Full FP16 KV is 128 KiB; here it is <b>${(bytes / 1024).toFixed(0)} KiB</b> (derived).`;
+    drawPrune(p);
+  };
+  $("budgetRange").addEventListener("input", (e) => setBudget(parseInt(e.target.value, 10)));
+
+  // ---- boot ---------------------------------------------------------------
+  setAlloc("paged");
+  setPolicy("h2o");
+  setBudget(3);
+})();
+</script>
+</body>
+</html>
