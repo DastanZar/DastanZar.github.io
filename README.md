@@ -10,8 +10,9 @@ the data.
 - `index.html`, `styles.css`, `app.js`, `receipts-data.js` — the deployed site.
 - `assets/` — the app capture, evidence plates, and paper grain.
 - `app/sdecode/` — the live recorded-session demo used by the sdecode case file.
+- `app/pagemem/`, `app/cplan/` — the live demos linked from the 20-card inventory.
 - `receipts/` — snapshots of each source repo's committed receipt.
-- `src/build.py` — extracts values from the receipts and writes the page.
+- `src/build.py` — extracts values from the receipts, writes the 10 case files and the 20-card inventory.
 - `src/sync_receipts.py` — refreshes the receipts from the public repos.
 
 ## Build
@@ -36,6 +37,7 @@ screenshots and visual tests).
 ## Design notes
 
 Warm paper, ink typography, one signal colour, and a receipt-console section
-that shows the actual JSON behind the page. The three featured systems each
-get an evidence plate; the remaining seven are an index with a hover receipt
-card. The application capture is real: `app/sdecode/session.html`.
+that shows the actual JSON behind the page. The ten case files each get a
+receipt-backed artifact; the full 20-repo inventory is a five-theme card grid
+with one measured claim per card. The application capture is real:
+`app/sdecode/session.html`; pagemem and cplan have runnable demos too.

@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEST = ROOT / "receipts"
 
 FILES = {
+    # Group 1
     "softfp8": "receipts/receipt.json",
     "latq": "receipts/receipt.json",
     "pagemem": "receipts/receipt.json",
@@ -23,10 +24,22 @@ FILES = {
     "kvstamp": "receipts/receipt.json",
     "gembench": "receipts/receipt.json",
     "bithash": "receipts/receipt.json",
+    # Group 2
+    "pushdown": "receipts/receipt.json",
+    "radixlite": "receipts/receipt.json",
+    "streamdetok": "receipts/receipt.json",
+    "bitforge": "receipts/receipt.json",
+    "ring": "receipts/receipt.json",
+    "chunkpipe": "receipts/receipt.json",
+    "gatekeeper": "receipts/receipt.json",
+    "pagedattn": "receipts/receipt.json",
+    "treetrace": "receipts/receipt.json",
+    "expertcache": "receipts/receipt.json",
 }
 
 EXTRA = {
     "sdecode-real-run": ("sdecode", "receipts/real_run.json", "sdecode_real_run.json"),
+    "sdecode-session": ("sdecode", "receipts/session.json", "sdecode_session.json"),
 }
 
 

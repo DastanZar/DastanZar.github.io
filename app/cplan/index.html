@@ -1,0 +1,1083 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="cplan TTFT departure board: set a first-token budget and see which batching schedule clears it at every arrival rate.">
+  <title>cplan — TTFT departure board</title>
+  <link rel="stylesheet" href="../_base.css">
+  <script src="data.js"></script>
+  <style>
+    .cplan .scenario h1 {
+      max-width: 1040px;
+    }
+
+    .cplan .lede {
+      max-width: 690px;
+      margin-top: 20px;
+      color: var(--ink-soft);
+      font-size: clamp(16px, 1.5vw, 19px);
+      line-height: 1.45;
+    }
+
+    .cplan .lede b {
+      font-weight: 600;
+    }
+
+    .schedule-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 0.8fr) auto;
+      gap: 18px;
+      align-items: end;
+      padding: 15px 0 17px;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .rate-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      border: 1px solid var(--line-strong);
+      width: fit-content;
+    }
+
+    .rate-tabs button {
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .rate-tabs button:last-child {
+      border-right: 0;
+    }
+
+    .rate-tabs button[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .rate-tabs button:hover:not([aria-pressed="true"]) {
+      background: var(--paper-2);
+    }
+
+    .slider-control {
+      display: grid;
+      gap: 5px;
+    }
+
+    .slider-control .slider-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .slider-control output {
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider-control input[type="range"] {
+      width: 100%;
+      margin: 3px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .slider-control .range-notes {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+      gap: clamp(18px, 3vw, 40px);
+      align-items: start;
+      padding: 22px 0 12px;
+    }
+
+    .board-panel {
+      min-width: 0;
+      background: var(--green);
+      color: var(--cream);
+      border-top: 4px solid var(--ink);
+      padding: 0 15px 12px;
+      box-shadow: 8px 8px 0 rgba(20, 21, 17, 0.06);
+    }
+
+    .board-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0 10px;
+      border-bottom: 1px solid rgba(239, 234, 221, 0.24);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .board-head strong {
+      color: var(--sage);
+      font-weight: 400;
+    }
+
+    .board-head .board-count {
+      color: var(--accent);
+    }
+
+    .board-columns {
+      display: grid;
+      grid-template-columns: 80px minmax(0, 1fr) 66px;
+      gap: 10px;
+      padding: 7px 0 6px;
+      border-bottom: 1px solid rgba(239, 234, 221, 0.14);
+      color: var(--sage);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .board-columns span:nth-child(2) {
+      text-align: left;
+    }
+
+    .board-columns span:last-child {
+      text-align: right;
+    }
+
+    .board-row {
+      display: grid;
+      grid-template-columns: 80px minmax(0, 1fr) 66px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(239, 234, 221, 0.14);
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+
+    .board-row:last-child {
+      border-bottom: 0;
+    }
+
+    .board-row:hover,
+    .board-row[aria-selected="true"] {
+      background: rgba(239, 234, 221, 0.055);
+    }
+
+    .board-row[aria-selected="true"] .load {
+      color: var(--accent);
+    }
+
+    .load {
+      font-family: var(--mono);
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: -0.06em;
+      line-height: 1;
+      transition: color 160ms ease;
+    }
+
+    .load small {
+      display: block;
+      margin-top: 3px;
+      color: var(--sage);
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .departures {
+      display: grid;
+      gap: 4px;
+    }
+
+    .departure {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: baseline;
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .departure .mode {
+      color: var(--sage);
+      font-size: 8px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .departure .ttft {
+      color: var(--cream);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .departure .flag {
+      min-width: 47px;
+      padding: 2px 4px;
+      border: 1px solid rgba(239, 234, 221, 0.28);
+      color: var(--sage);
+      font-size: 8px;
+      letter-spacing: 0.04em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .departure .flag.pass {
+      border-color: var(--sage);
+      color: var(--sage);
+    }
+
+    .departure .flag.miss {
+      border-color: var(--accent);
+      background: rgba(233, 73, 27, 0.12);
+      color: var(--accent);
+    }
+
+    .departure .flag.flash {
+      animation: flag-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes flag-in {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .board-arrow {
+      color: var(--sage);
+      font-family: var(--mono);
+      font-size: 16px;
+      text-align: right;
+      transition: transform 160ms ease, color 160ms ease;
+    }
+
+    .board-row[aria-selected="true"] .board-arrow {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .board-foot {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 9px;
+      color: var(--sage);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.03em;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    .board-foot b {
+      color: var(--cream);
+      font-weight: 500;
+    }
+
+    .detail {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+      border-top: 1px solid var(--ink);
+      padding-top: 11px;
+    }
+
+    .detail-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .detail-head .label {
+      color: var(--ink);
+    }
+
+    .detail-rate {
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .detail h2 {
+      margin-top: 8px;
+      font-family: var(--serif);
+      font-size: clamp(31px, 4.1vw, 53px);
+      font-weight: 400;
+      letter-spacing: -0.04em;
+      line-height: 0.98;
+    }
+
+    .detail h2 em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .detail p {
+      margin-top: 10px;
+      max-width: 390px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .pair {
+      border-top: 1px solid var(--line);
+    }
+
+    .pair-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pair-row dt {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .pair-row dd {
+      font-family: var(--mono);
+      font-size: 17px;
+      font-weight: 500;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pair-row dd small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .pair-row dd.accent {
+      color: var(--accent-dark);
+    }
+
+    .pair-row .strike {
+      color: var(--muted);
+      font-size: 11px;
+      text-decoration: line-through;
+      text-decoration-color: var(--accent);
+    }
+
+    .ruler-panel {
+      margin-top: 10px;
+      border-top: 1px solid var(--ink);
+      padding: 13px 0 8px;
+    }
+
+    .ruler-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .ruler-head .label {
+      color: var(--ink);
+    }
+
+    .ruler-head .sub {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      text-transform: uppercase;
+    }
+
+    .ruler-axis {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr);
+      gap: 10px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+    }
+
+    .ticks {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      padding: 0 2px 4px;
+    }
+
+    .ruler-lane {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 35px;
+      border-top: 1px solid var(--line);
+    }
+
+    .ruler-lane .rate {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .ruler-lane .rate small {
+      display: block;
+      color: var(--muted);
+      font-size: 8px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .track {
+      position: relative;
+      height: 24px;
+      background: linear-gradient(90deg, rgba(170, 182, 160, 0.16), transparent 55%);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .track::after {
+      content: "";
+      position: absolute;
+      inset: 50% 0 auto;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .dot {
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      transform: translate(-50%, -50%);
+      transition: left 360ms cubic-bezier(0.16, 1, 0.3, 1), opacity 160ms ease;
+    }
+
+    .dot::before {
+      content: "";
+      display: block;
+      width: 9px;
+      height: 9px;
+      border: 1px solid var(--paper);
+      border-radius: 50%;
+      background: var(--ink);
+      box-shadow: 0 0 0 1px var(--ink);
+    }
+
+    .dot.static::before {
+      border-radius: 0;
+      background: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-dark);
+    }
+
+    .dot.selected::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+    }
+
+    .dot.static.selected::after {
+      border-radius: 0;
+      border-color: var(--accent-dark);
+    }
+
+    .dot span {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 7px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+
+    .dot.selected span,
+    .ruler-lane:hover .dot span {
+      opacity: 1;
+    }
+
+    .budget-mark {
+      position: absolute;
+      top: -3px;
+      bottom: -3px;
+      z-index: 3;
+      width: 1px;
+      background: var(--accent);
+      transition: left 120ms ease;
+      pointer-events: none;
+    }
+
+    .budget-mark::before {
+      content: "BUDGET";
+      position: absolute;
+      top: -10px;
+      left: 3px;
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-size: 7px;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .ruler-lane:not(:first-child) .budget-mark::before {
+      display: none;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+      gap: clamp(20px, 4vw, 60px);
+      align-items: start;
+      margin-top: 18px;
+      padding: 22px 0 30px;
+      border-top: 1px solid var(--ink);
+    }
+
+    .decision .label {
+      margin-bottom: 8px;
+    }
+
+    .decision h2 {
+      max-width: 880px;
+      font-family: var(--serif);
+      font-size: clamp(31px, 4.3vw, 57px);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+    }
+
+    .decision h2 em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .decision p {
+      margin-top: 13px;
+      max-width: 630px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .decision-figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding-top: 5px;
+    }
+
+    .decision-figure {
+      border-top: 1px solid var(--ink);
+      padding-top: 8px;
+    }
+
+    .decision-figure strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: clamp(22px, 2.4vw, 32px);
+      font-weight: 500;
+      letter-spacing: -0.05em;
+    }
+
+    .decision-figure span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.03em;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+
+    .decision-figure.accent strong {
+      color: var(--accent-dark);
+    }
+
+    @media (max-width: 1060px) {
+      .schedule-controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .board-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.65fr);
+        gap: 24px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .schedule-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .board-head {
+        align-items: flex-start;
+      }
+
+      .board-columns,
+      .board-row {
+        grid-template-columns: 66px minmax(0, 1fr) 25px;
+      }
+
+      .departure {
+        grid-template-columns: 59px minmax(0, 1fr) auto;
+        gap: 5px;
+      }
+
+      .detail {
+        display: block;
+      }
+
+      .detail .pair {
+        margin-top: 18px;
+      }
+
+      .ruler-axis,
+      .ruler-lane {
+        grid-template-columns: 50px minmax(0, 1fr);
+        gap: 7px;
+      }
+
+      .decision {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-figures {
+        max-width: 460px;
+      }
+
+      .budget-mark::before {
+        display: none;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .board-panel {
+        padding-inline: 10px;
+      }
+
+      .board-columns,
+      .board-row {
+        grid-template-columns: 57px minmax(0, 1fr) 18px;
+        gap: 6px;
+      }
+
+      .departure {
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+      }
+
+      .departure .mode {
+        font-size: 7px;
+      }
+
+      .departure .ttft {
+        font-size: 12px;
+      }
+
+      .decision-figures {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="cplan">
+
+<header class="masthead">
+  <a class="brand" href="../../index.html"><span>DASTANZAR</span> / MLSYS</a>
+  <nav aria-label="Project navigation">
+    <a href="../../index.html">Portfolio</a>
+    <a href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">Repo ↗</a>
+    <a href="https://github.com/DastanZar/cplan/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Receipt ↗</a>
+  </nav>
+</header>
+
+<main class="shell">
+
+  <section class="scenario">
+    <div>
+      <div class="kicker"><span class="rule"></span><span class="label">cplan / continuous batching</span></div>
+      <h1>The first token<br><em>is the timetable.</em></h1>
+      <p class="lede">End-to-end SLO attainment can look healthy while every user stares at an empty screen. This board puts the first token on the clock. Set your mean-TTFT budget, pick a load, and watch static batching miss the gate that continuous batching clears.</p>
+    </div>
+    <div class="brief">
+      <div class="label">The decision</div>
+      <p>At a fixed first-token budget, which scheduler keeps the platform inside it as arrival rate rises?</p>
+      <div class="stamp">simulated sweep</div>
+    </div>
+  </section>
+
+  <section class="schedule-controls" aria-label="Schedule controls">
+    <div class="control">
+      <div class="label">Arrival rate</div>
+      <div class="rate-tabs" id="rateTabs" role="group" aria-label="Arrival rate">
+        <button type="button" data-rate="0.8" aria-pressed="false">0.8/s</button>
+        <button type="button" data-rate="1.5" aria-pressed="false">1.5/s</button>
+        <button type="button" data-rate="2.5" aria-pressed="false">2.5/s</button>
+        <button type="button" data-rate="4.0" aria-pressed="true">4.0/s</button>
+      </div>
+    </div>
+    <div class="slider-control">
+      <div class="slider-top">
+        <label class="label" for="budgetRange">Mean TTFT budget</label>
+        <output id="budgetOut" for="budgetRange">300 ms</output>
+      </div>
+      <input id="budgetRange" type="range" min="50" max="1200" step="10" value="300">
+      <div class="range-notes"><span>50 ms</span><span>1,200 ms</span></div>
+    </div>
+    <div class="slider-control">
+      <div class="slider-top">
+        <label class="label" for="floorRange">4s SLO floor</label>
+        <output id="floorOut" for="floorRange">99%</output>
+      </div>
+      <input id="floorRange" type="range" min="90" max="100" step="1" value="99">
+      <div class="range-notes"><span>90%</span><span>100%</span></div>
+    </div>
+    <button class="btn" id="replayBtn" type="button">Replay gate</button>
+  </section>
+
+  <section class="board-grid">
+    <div class="board-panel" aria-label="Departure board">
+      <div class="board-head">
+        <strong>Departures / mean TTFT</strong>
+        <span class="board-count" id="boardCount">—</span>
+      </div>
+      <div class="board-columns" aria-hidden="true">
+        <span>Load</span>
+        <span>Schedule / first token</span>
+        <span>Gate</span>
+      </div>
+      <div id="boardRows"></div>
+      <div class="board-foot">
+        <span>Continuous <b id="contSummary">—</b></span>
+        <span>Static <b id="staticSummary">—</b></span>
+      </div>
+    </div>
+
+    <aside class="detail" aria-label="Selected departure">
+      <div>
+        <div class="detail-head">
+          <div class="label">Selected departure</div>
+          <div class="detail-rate" id="detailRate">—</div>
+        </div>
+        <h2 id="detailHeadline">—</h2>
+        <p id="detailBody">—</p>
+      </div>
+      <dl class="pair">
+        <div class="pair-row"><dt>Mean TTFT / continuous</dt><dd class="accent" id="pContTtft">—</dd></div>
+        <div class="pair-row"><dt>Mean TTFT / static</dt><dd id="pStatTtft">—</dd></div>
+        <div class="pair-row"><dt>p99 end-to-end / continuous</dt><dd id="pContP99">—</dd></div>
+        <div class="pair-row"><dt>p99 end-to-end / static</dt><dd id="pStatP99">—</dd></div>
+        <div class="pair-row"><dt>4s SLO / continuous</dt><dd id="pContSlo">—</dd></div>
+        <div class="pair-row"><dt>4s SLO / static</dt><dd id="pStatSlo">—</dd></div>
+      </dl>
+    </aside>
+  </section>
+
+  <section class="ruler-panel" aria-label="Latency gate">
+    <div class="ruler-head">
+      <div class="label">The gate, in milliseconds</div>
+      <div class="sub">dots = mean TTFT · line = your budget</div>
+    </div>
+    <div class="ruler-axis" aria-hidden="true">
+      <span></span>
+      <div class="ticks">
+        <span>0</span><span>300</span><span>600</span><span>900</span><span>1,200</span>
+      </div>
+    </div>
+    <div id="rulerLanes"></div>
+  </section>
+
+  <section class="decision" aria-label="Scheduling decision">
+    <div>
+      <div class="label">The scheduling read</div>
+      <h2 id="decisionHeadline">—</h2>
+      <p id="decisionBody">—</p>
+    </div>
+    <div class="decision-figures">
+      <div class="decision-figure accent">
+        <strong id="dCont">—</strong>
+        <span>continuous loads on time</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dStatic">—</strong>
+        <span>static loads on time</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dGap">—</strong>
+        <span>TTFT cut at selected load</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dP99">—</strong>
+        <span>static p99 at selected load</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="receipt-note">
+    <span>Source <b>receipts/receipt.json</b></span>
+    <span>Model <b>scheduler simulator / 4s end-to-end SLO</b></span>
+    <span>Budget and SLO floor are <b>your inputs</b></span>
+    <a href="https://github.com/DastanZar/cplan/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Open receipt ↗</a>
+  </div>
+</main>
+
+<footer class="footer">
+  <span>cplan / TTFT departure board</span>
+  <span>Simulated scheduler comparison. Absolute latency depends on the engine cost model.</span>
+</footer>
+
+<script>
+(() => {
+  const DATA = window.CPLAN_DATA || {};
+  const SWEEP = DATA.sweep || {};
+  const RATES = ["0.8", "1.5", "2.5", "4.0"];
+  const MAX_MS = 1200;
+  const $ = (id) => document.getElementById(id);
+
+  const state = {
+    selected: "4.0",
+    budget: 300,
+    floor: 99,
+    replay: 0,
+  };
+
+  const rows = RATES.map((rate) => {
+    const cell = SWEEP[`rate=${rate}/s`] || {};
+    return {
+      rate,
+      continuous: cell.continuous || {},
+      static: cell.static || {},
+      improvement: cell.ttft_improvement || "—",
+    };
+  });
+
+  const fmtMs = (value) => Number(value).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtPct = (value) => (Number(value) * 100).toFixed(1).replace(/\.0$/, "") + "%";
+  const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+  const getRow = (rate) => rows.find((row) => row.rate === rate);
+
+  function passes(row, mode) {
+    const data = row[mode];
+    return data.ttft <= state.budget && data.slo * 100 >= state.floor;
+  }
+
+  function gateCount(mode) {
+    return rows.filter((row) => passes(row, mode)).length;
+  }
+
+  function renderControls() {
+    document.querySelectorAll("[data-rate]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.rate === state.selected));
+    });
+    $("budgetOut").textContent = `${state.budget.toLocaleString("en-US")} ms`;
+    $("floorOut").textContent = `${state.floor}%`;
+  }
+
+  function renderBoard() {
+    const board = $("boardRows");
+    board.innerHTML = "";
+    rows.forEach((row) => {
+      const item = document.createElement("div");
+      item.className = "board-row";
+      item.setAttribute("role", "button");
+      item.setAttribute("tabindex", "0");
+      item.setAttribute("aria-selected", String(row.rate === state.selected));
+      item.dataset.rate = row.rate;
+      const cPass = passes(row, "continuous");
+      const sPass = passes(row, "static");
+      item.innerHTML = `
+        <div class="load">${row.rate}<small>req / s</small></div>
+        <div class="departures">
+          <div class="departure">
+            <span class="mode">continuous</span>
+            <span class="ttft">${fmtMs(row.continuous.ttft)} ms</span>
+            <span class="flag ${cPass ? "pass" : "miss"}">${cPass ? "on time" : "miss"}</span>
+          </div>
+          <div class="departure">
+            <span class="mode">static</span>
+            <span class="ttft">${fmtMs(row.static.ttft)} ms</span>
+            <span class="flag ${sPass ? "pass" : "miss"}">${sPass ? "on time" : "miss"}</span>
+          </div>
+        </div>
+        <div class="board-arrow">→</div>
+      `;
+      const choose = () => {
+        state.selected = row.rate;
+        render();
+      };
+      item.addEventListener("click", choose);
+      item.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          choose();
+        }
+      });
+      board.appendChild(item);
+    });
+
+    const cont = gateCount("continuous");
+    const stat = gateCount("static");
+    $("boardCount").textContent = `${state.budget} ms gate`;
+    $("contSummary").textContent = `${cont} / 4 on time`;
+    $("staticSummary").textContent = `${stat} / 4 on time`;
+  }
+
+  function renderDetail() {
+    const row = getRow(state.selected);
+    const c = row.continuous;
+    const s = row.static;
+    const cPass = passes(row, "continuous");
+    const sPass = passes(row, "static");
+
+    $("detailRate").textContent = `${row.rate} req/s / selected`;
+    $("pContTtft").innerHTML = `${fmtMs(c.ttft)} ms<small>${cPass ? "inside budget" : "over budget"}</small>`;
+    $("pStatTtft").innerHTML = `${fmtMs(s.ttft)} ms<small>${sPass ? "inside budget" : "over budget"}</small>`;
+    $("pContP99").textContent = `${fmtMs(c.p99)} ms`;
+    $("pStatP99").textContent = `${fmtMs(s.p99)} ms`;
+    $("pContSlo").textContent = fmtPct(c.slo);
+    $("pStatSlo").textContent = fmtPct(s.slo);
+    $("pContTtft").className = cPass ? "accent" : "";
+    $("pStatTtft").className = sPass ? "accent" : "";
+
+    if (cPass && sPass) {
+      $("detailHeadline").innerHTML = `Both schedules <em>clear the gate.</em>`;
+      $("detailBody").textContent = `At ${row.rate} req/s, continuous still has the smaller first-token bill: ${fmtMs(c.ttft)} ms versus ${fmtMs(s.ttft)} ms. Raise the load or tighten the budget to find the split.`;
+    } else if (cPass && !sPass) {
+      $("detailHeadline").innerHTML = `Continuous clears.<br><em>Static misses.</em>`;
+      $("detailBody").textContent = `At ${row.rate} req/s, the first token arrives at ${fmtMs(c.ttft)} ms with continuous batching and ${fmtMs(s.ttft)} ms with static batching. The ${state.budget} ms budget is the difference between a responsive queue and a wait state.`;
+    } else if (!cPass && sPass) {
+      $("detailHeadline").innerHTML = `Static clears.<br><em>Continuous misses.</em>`;
+      $("detailBody").textContent = `This budget is below the continuous mean TTFT at ${row.rate} req/s, while static happens to land inside it. The receipt says the reverse ordering is the stable result; this is a budget edge case, not a scheduling win for static.`;
+    } else {
+      $("detailHeadline").innerHTML = `Both schedules <em>miss the gate.</em>`;
+      $("detailBody").textContent = `At ${row.rate} req/s and a ${state.budget} ms budget, neither mean TTFT fits. Continuous is still ${fmtMs(s.ttft - c.ttft)} ms earlier; the absolute floor depends on the engine model.`;
+    }
+  }
+
+  function renderRuler() {
+    const lanes = $("rulerLanes");
+    lanes.innerHTML = "";
+    rows.forEach((row) => {
+      const lane = document.createElement("div");
+      lane.className = "ruler-lane";
+      lane.innerHTML = `
+        <div class="rate">${row.rate}<small>req/s</small></div>
+        <div class="track">
+          <span class="dot continuous ${row.rate === state.selected ? "selected" : ""}" style="left:${clamp(row.continuous.ttft / MAX_MS * 100, 1, 99)}%"><span>${fmtMs(row.continuous.ttft)}</span></span>
+          <span class="dot static ${row.rate === state.selected ? "selected" : ""}" style="left:${clamp(row.static.ttft / MAX_MS * 100, 1, 99)}%"><span>${fmtMs(row.static.ttft)}</span></span>
+          <span class="budget-mark" style="left:${clamp(state.budget / MAX_MS * 100, 1, 99)}%"></span>
+        </div>
+      `;
+      lanes.appendChild(lane);
+    });
+  }
+
+  function renderDecision() {
+    const row = getRow(state.selected);
+    const c = row.continuous;
+    const s = row.static;
+    const cont = gateCount("continuous");
+    const stat = gateCount("static");
+
+    $("dCont").textContent = `${cont} / 4`;
+    $("dStatic").textContent = `${stat} / 4`;
+    $("dGap").textContent = row.improvement;
+    $("dP99").textContent = `${fmtMs(s.p99)} ms`;
+
+    if (cont > stat) {
+      $("decisionHeadline").innerHTML = `Continuous holds <em>${cont} of 4</em> loads. Static holds <em>${stat}.</em>`;
+      $("decisionBody").textContent = `At a ${state.budget} ms mean-TTFT budget and a ${state.floor}% 4s-SLO floor, the split is the deployment case: continuous batching keeps the first token inside the gate as load rises. At ${row.rate} req/s it cuts mean TTFT by ${row.improvement} (${fmtMs(c.ttft)} ms vs ${fmtMs(s.ttft)} ms). The 4s SLO is end-to-end; it can stay green while the first token is already late.`;
+    } else if (cont === stat) {
+      $("decisionHeadline").innerHTML = `At this budget, <em>the schedules tie.</em>`;
+      $("decisionBody").textContent = `Both clear ${cont} of 4 loads at a ${state.budget} ms mean-TTFT budget. Tighten the budget to expose the queueing gap; the selected load still shows a ${row.improvement} mean-TTFT cut for continuous.`;
+    } else {
+      $("decisionHeadline").innerHTML = `The budget is <em>below both floors.</em>`;
+      $("decisionBody").textContent = `Neither schedule keeps ${cont > stat ? "continuous" : "static"} inside ${state.budget} ms at this configuration. The selected load still shows ${fmtMs(c.ttft)} ms continuous vs ${fmtMs(s.ttft)} ms static, but the gate is a deployment input, not a claim about this simulator's absolute floor.`;
+    }
+  }
+
+  function animateFlags() {
+    const flags = document.querySelectorAll(".departure .flag");
+    flags.forEach((flag, index) => {
+      flag.classList.remove("flash");
+      void flag.offsetWidth;
+      flag.style.animationDelay = `${Math.min(index * 18, 200)}ms`;
+      flag.classList.add("flash");
+    });
+  }
+
+  function render(animate = false) {
+    renderControls();
+    renderBoard();
+    renderDetail();
+    renderRuler();
+    renderDecision();
+    if (animate) animateFlags();
+  }
+
+  document.querySelectorAll("[data-rate]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selected = button.dataset.rate;
+      render(true);
+    });
+  });
+
+  $("budgetRange").addEventListener("input", (event) => {
+    state.budget = Number(event.target.value);
+    render(true);
+  });
+  $("floorRange").addEventListener("input", (event) => {
+    state.floor = Number(event.target.value);
+    render(true);
+  });
+  $("replayBtn").addEventListener("click", () => {
+    state.replay += 1;
+    render(true);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

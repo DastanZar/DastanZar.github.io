@@ -1,0 +1,534 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-15T07:09:44.671652+00:00",
+  "backend": "torch",
+  "device": "cpu",
+  "execution": "cpu_torch",
+  "environment": {
+    "python": "3.11.15",
+    "platform": "Linux-6.17.0-1011-oracle-aarch64-with-glibc2.39",
+    "machine": "aarch64",
+    "torch": "2.14.0+cpu",
+    "triton": "3.8.0",
+    "cuda_available": false,
+    "cuda_runtime": null,
+    "gpu": null,
+    "torch_threads": 1,
+    "TRITON_INTERPRET": null
+  },
+  "method": {
+    "repeats": 7,
+    "warmup": 2,
+    "seed": 7,
+    "q_heads": 4,
+    "kv_heads": 2,
+    "head_dim": 32,
+    "block_size": 16,
+    "dtype": "torch.float32",
+    "timed_scope": "validated public API + allocation",
+    "clock": "perf_counter_ns, synchronized on CUDA; CUDA events also recorded",
+    "baseline": "dense exact-window gather + einsum softmax, not optimized SDPA",
+    "not_measured": [
+      "HBM traffic",
+      "kernel-only latency",
+      "production throughput"
+    ]
+  },
+  "source_sha256": {
+    "benchmark.py": "6722767025e5024ae4f1675e67c2318a4b5452f1484dc3f967e9fb910fae7e01",
+    "workloads.py": "bfa6d2087ab6aeb90e4e110db9c79ab3db44951af81b2fe114d9a1fb91ed5752",
+    "kernel.py": "05d8011bfbf5c7550bef9f4a8ea68ce5c77db259568626fc8ba7b1783cc85bf6",
+    "core.py": "7ab38b58493fab884b9bcc79a34fb6e2da114b0263899acc3402ac01722b26a6",
+    "__init__.py": "be98d77d3604233528c15c1658a7ffc8ca830ae3599c71ef234d589a6d1d9e5a"
+  },
+  "cases": [
+    {
+      "lengths": [
+        37,
+        12
+      ],
+      "window": null,
+      "max_abs_error": 2.384185791015625e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          0.779245,
+          0.708485,
+          0.807845,
+          0.789485,
+          0.788925,
+          0.766805,
+          0.740405
+        ],
+        "wall_ms_median": 0.779245,
+        "wall_ms_min": 0.708485,
+        "wall_ms_max": 0.807845,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.447843,
+          0.407442,
+          0.440923,
+          0.404363,
+          0.440523,
+          0.455083,
+          0.397602
+        ],
+        "wall_ms_median": 0.440523,
+        "wall_ms_min": 0.397602,
+        "wall_ms_max": 0.455083,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          3,
+          1
+        ],
+        "tokens_per_seq": [
+          37,
+          12
+        ],
+        "token_payload_bytes": 25088,
+        "block_footprint_bytes": 32768,
+        "read_bytes": 32768,
+        "unwindowed_bytes": 32768
+      }
+    },
+    {
+      "lengths": [
+        37,
+        12
+      ],
+      "window": 17,
+      "max_abs_error": 2.384185791015625e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          0.602124,
+          0.546683,
+          0.630045,
+          0.582043,
+          0.550124,
+          0.591444,
+          0.559723
+        ],
+        "wall_ms_median": 0.582043,
+        "wall_ms_min": 0.546683,
+        "wall_ms_max": 0.630045,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.458843,
+          0.403002,
+          0.390843,
+          0.432523,
+          0.381922,
+          0.408563,
+          0.390162
+        ],
+        "wall_ms_median": 0.403002,
+        "wall_ms_min": 0.381922,
+        "wall_ms_max": 0.458843,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          2,
+          1
+        ],
+        "tokens_per_seq": [
+          17,
+          12
+        ],
+        "token_payload_bytes": 14848,
+        "block_footprint_bytes": 24576,
+        "read_bytes": 24576,
+        "unwindowed_bytes": 32768
+      }
+    },
+    {
+      "lengths": [
+        37,
+        12
+      ],
+      "window": 128,
+      "max_abs_error": 2.384185791015625e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          0.780845,
+          0.766445,
+          0.823005,
+          0.783045,
+          0.731125,
+          0.765445,
+          0.754044
+        ],
+        "wall_ms_median": 0.766445,
+        "wall_ms_min": 0.731125,
+        "wall_ms_max": 0.823005,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.406643,
+          0.390242,
+          0.436123,
+          0.394083,
+          0.436722,
+          0.391963,
+          0.420923
+        ],
+        "wall_ms_median": 0.406643,
+        "wall_ms_min": 0.390242,
+        "wall_ms_max": 0.436722,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          3,
+          1
+        ],
+        "tokens_per_seq": [
+          37,
+          12
+        ],
+        "token_payload_bytes": 25088,
+        "block_footprint_bytes": 32768,
+        "read_bytes": 32768,
+        "unwindowed_bytes": 32768
+      }
+    },
+    {
+      "lengths": [
+        128,
+        42
+      ],
+      "window": null,
+      "max_abs_error": 1.7881393432617188e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          1.758411,
+          1.832412,
+          1.826011,
+          1.851812,
+          1.779652,
+          1.811451,
+          1.796732
+        ],
+        "wall_ms_median": 1.811451,
+        "wall_ms_min": 1.758411,
+        "wall_ms_max": 1.851812,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.540404,
+          0.482643,
+          0.509883,
+          0.467523,
+          0.521684,
+          0.473403,
+          0.514563
+        ],
+        "wall_ms_median": 0.509883,
+        "wall_ms_min": 0.467523,
+        "wall_ms_max": 0.540404,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          8,
+          3
+        ],
+        "tokens_per_seq": [
+          128,
+          42
+        ],
+        "token_payload_bytes": 87040,
+        "block_footprint_bytes": 90112,
+        "read_bytes": 90112,
+        "unwindowed_bytes": 90112
+      }
+    },
+    {
+      "lengths": [
+        128,
+        42
+      ],
+      "window": 17,
+      "max_abs_error": 2.980232238769531e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          0.718645,
+          0.750885,
+          0.715684,
+          0.696285,
+          0.721685,
+          0.727364,
+          0.734565
+        ],
+        "wall_ms_median": 0.721685,
+        "wall_ms_min": 0.696285,
+        "wall_ms_max": 0.750885,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.441362,
+          0.401843,
+          0.433523,
+          0.426562,
+          0.434723,
+          0.453843,
+          0.390843
+        ],
+        "wall_ms_median": 0.433523,
+        "wall_ms_min": 0.390843,
+        "wall_ms_max": 0.453843,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          2,
+          2
+        ],
+        "tokens_per_seq": [
+          17,
+          17
+        ],
+        "token_payload_bytes": 17408,
+        "block_footprint_bytes": 32768,
+        "read_bytes": 32768,
+        "unwindowed_bytes": 90112
+      }
+    },
+    {
+      "lengths": [
+        128,
+        42
+      ],
+      "window": 128,
+      "max_abs_error": 1.7881393432617188e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          1.851972,
+          1.824252,
+          1.864492,
+          1.817411,
+          1.771012,
+          1.868772,
+          1.827011
+        ],
+        "wall_ms_median": 1.827011,
+        "wall_ms_min": 1.771012,
+        "wall_ms_max": 1.868772,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.517324,
+          0.475563,
+          0.510003,
+          0.482843,
+          0.517963,
+          0.490244,
+          0.559563
+        ],
+        "wall_ms_median": 0.510003,
+        "wall_ms_min": 0.475563,
+        "wall_ms_max": 0.559563,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          8,
+          3
+        ],
+        "tokens_per_seq": [
+          128,
+          42
+        ],
+        "token_payload_bytes": 87040,
+        "block_footprint_bytes": 90112,
+        "read_bytes": 90112,
+        "unwindowed_bytes": 90112
+      }
+    },
+    {
+      "lengths": [
+        512,
+        170
+      ],
+      "window": null,
+      "max_abs_error": 1.4901161193847656e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          6.665163,
+          6.483801,
+          6.520322,
+          6.495322,
+          6.605602,
+          6.544162,
+          6.584083
+        ],
+        "wall_ms_median": 6.544162,
+        "wall_ms_min": 6.483801,
+        "wall_ms_max": 6.665163,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.701125,
+          0.739245,
+          0.759885,
+          0.717924,
+          0.692725,
+          0.713244,
+          0.719405
+        ],
+        "wall_ms_median": 0.717924,
+        "wall_ms_min": 0.692725,
+        "wall_ms_max": 0.759885,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          32,
+          11
+        ],
+        "tokens_per_seq": [
+          512,
+          170
+        ],
+        "token_payload_bytes": 349184,
+        "block_footprint_bytes": 352256,
+        "read_bytes": 352256,
+        "unwindowed_bytes": 352256
+      }
+    },
+    {
+      "lengths": [
+        512,
+        170
+      ],
+      "window": 17,
+      "max_abs_error": 1.7881393432617188e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          0.746885,
+          0.729044,
+          0.724165,
+          0.690724,
+          0.731925,
+          0.762005,
+          0.693884
+        ],
+        "wall_ms_median": 0.729044,
+        "wall_ms_min": 0.690724,
+        "wall_ms_max": 0.762005,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.456243,
+          0.402923,
+          0.437603,
+          0.421082,
+          0.455283,
+          0.439763,
+          0.407203
+        ],
+        "wall_ms_median": 0.437603,
+        "wall_ms_min": 0.402923,
+        "wall_ms_max": 0.456243,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          2,
+          2
+        ],
+        "tokens_per_seq": [
+          17,
+          17
+        ],
+        "token_payload_bytes": 17408,
+        "block_footprint_bytes": 32768,
+        "read_bytes": 32768,
+        "unwindowed_bytes": 352256
+      }
+    },
+    {
+      "lengths": [
+        512,
+        170
+      ],
+      "window": 128,
+      "max_abs_error": 1.4901161193847656e-07,
+      "streaming": {
+        "wall_ms_samples": [
+          2.739497,
+          2.672897,
+          2.662577,
+          2.720057,
+          2.648537,
+          2.645177,
+          2.778618
+        ],
+        "wall_ms_median": 2.672897,
+        "wall_ms_min": 2.645177,
+        "wall_ms_max": 2.778618,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "dense_gather": {
+        "wall_ms_samples": [
+          0.597044,
+          0.527084,
+          0.546283,
+          0.518243,
+          0.562124,
+          0.527803,
+          0.570484
+        ],
+        "wall_ms_median": 0.546283,
+        "wall_ms_min": 0.518243,
+        "wall_ms_max": 0.597044,
+        "cuda_event_ms_samples": null,
+        "cuda_event_ms_median": null
+      },
+      "plan": {
+        "blocks_read_per_seq": [
+          8,
+          9
+        ],
+        "tokens_per_seq": [
+          128,
+          128
+        ],
+        "token_payload_bytes": 131072,
+        "block_footprint_bytes": 139264,
+        "read_bytes": 139264,
+        "unwindowed_bytes": 352256
+      }
+    }
+  ],
+  "parity_ok": true,
+  "compiled_cuda_verified": false
+}

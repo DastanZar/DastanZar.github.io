@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="pagemem block desk: admit a ninth conversation into a fixed KV pool and see the pages that preallocation would have stranded.">
+  <title>pagemem — block desk</title>
+  <link rel="stylesheet" href="../_base.css">
+  <script src="data.js"></script>
+  <style>
+    .pagemem .scenario h1 {
+      max-width: 980px;
+    }
+
+    .pagemem .lede {
+      max-width: 700px;
+      margin-top: 20px;
+      color: var(--ink-soft);
+      font-size: clamp(16px, 1.5vw, 19px);
+      line-height: 1.45;
+    }
+
+    .pagemem .lede b {
+      font-weight: 600;
+    }
+
+    .desk-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 0 16px;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pool-readout {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .pool-readout b {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .pool-readout span {
+      color: var(--muted);
+      text-transform: none;
+    }
+
+    .desk {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.45fr);
+      gap: clamp(18px, 3vw, 42px);
+      align-items: start;
+      padding: 22px 0 14px;
+    }
+
+    .stage {
+      min-width: 0;
+      border-top: 1px solid var(--ink);
+    }
+
+    .stage-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0 9px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stage-head .label {
+      color: var(--ink);
+    }
+
+    .stage-head .sub {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .wall-wrap {
+      padding: 15px 0 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pagewall {
+      display: grid;
+      grid-template-columns: repeat(36, minmax(0, 1fr));
+      gap: 2px;
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(20, 21, 17, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 21, 17, 0.035) 1px, transparent 1px),
+        var(--paper-2);
+      background-size: 18px 18px;
+    }
+
+    .page {
+      position: relative;
+      aspect-ratio: 1;
+      min-width: 0;
+      background: rgba(20, 21, 17, 0.045);
+      box-shadow: inset 0 0 0 0.5px rgba(20, 21, 17, 0.11);
+      transition: background 140ms ease, opacity 140ms ease;
+    }
+
+    .page.prefix {
+      background: var(--sage);
+      box-shadow: inset 0 0 0 0.5px rgba(20, 21, 17, 0.22);
+    }
+
+    .page.used {
+      background: var(--ink);
+      box-shadow: inset 0 0 0 0.5px rgba(239, 234, 221, 0.15);
+    }
+
+    .page.used.tone-1 { background: #34392f; }
+    .page.used.tone-2 { background: #4c5142; }
+    .page.used.tone-3 { background: #626856; }
+    .page.used.tone-4 { background: #7c816c; }
+    .page.used.tone-5 { background: #979b83; }
+    .page.used.tone-6 { background: #b0b49b; }
+    .page.used.tone-7 { background: #c9cbb4; }
+
+    .page.padding {
+      background:
+        repeating-linear-gradient(135deg, transparent 0 2px, rgba(20, 21, 17, 0.16) 2px 3px),
+        var(--paper-3);
+    }
+
+    .page.new {
+      animation: page-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes page-in {
+      from { opacity: 0; transform: scale(0.35); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      padding: 9px 0 0;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend i {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      background: var(--ink);
+    }
+
+    .legend .i-prefix { background: var(--sage); }
+    .legend .i-pad { background: repeating-linear-gradient(135deg, transparent 0 2px, rgba(20,21,17,.35) 2px 3px), var(--paper-3); }
+    .legend .i-free { background: rgba(20,21,17,.05); box-shadow: inset 0 0 0 0.5px rgba(20,21,17,.2); }
+
+    .session-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 20px;
+      padding-top: 5px;
+    }
+
+    .session-line {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: baseline;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    .session-line .id {
+      font-weight: 600;
+    }
+
+    .session-line .bar {
+      height: 5px;
+      background: var(--paper-3);
+      overflow: hidden;
+    }
+
+    .session-line .bar i {
+      display: block;
+      height: 100%;
+      background: var(--ink);
+    }
+
+    .session-line .num {
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .session-line.rejected {
+      color: var(--accent-dark);
+    }
+
+    .block-ledger {
+      position: sticky;
+      top: 18px;
+      border-top: 4px solid var(--ink);
+      background: var(--paper-2);
+    }
+
+    .block-ledger-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px 9px;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .block-ledger-head h2 {
+      font-family: var(--serif);
+      font-size: 29px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .block-ledger-head span {
+      color: var(--sage);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .block-ledger dl {
+      margin: 0;
+      padding: 0 14px;
+    }
+
+    .block-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .block-row:last-child {
+      border-bottom: 0;
+    }
+
+    .block-row dt {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .block-row dd {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .block-row dd.big {
+      font-size: 25px;
+      letter-spacing: -0.06em;
+    }
+
+    .block-row dd.accent {
+      color: var(--accent-dark);
+    }
+
+    .block-row dd small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .ledger-stamp {
+      margin: 12px 14px 14px;
+      border: 1px solid var(--accent);
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      line-height: 1.35;
+      padding: 7px 8px;
+      text-align: center;
+      text-transform: uppercase;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .ledger-stamp.reject {
+      background: var(--accent);
+      color: var(--paper);
+    }
+
+    .ledger-stamp.ok {
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+      gap: clamp(20px, 4vw, 60px);
+      align-items: start;
+      margin-top: 18px;
+      padding: 22px 0 30px;
+      border-top: 1px solid var(--ink);
+    }
+
+    .decision .label {
+      margin-bottom: 8px;
+    }
+
+    .decision h2 {
+      max-width: 860px;
+      font-family: var(--serif);
+      font-size: clamp(31px, 4.3vw, 57px);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+    }
+
+    .decision h2 em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .decision p {
+      margin-top: 13px;
+      max-width: 620px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .decision-figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding-top: 5px;
+    }
+
+    .decision-figure {
+      border-top: 1px solid var(--ink);
+      padding-top: 8px;
+    }
+
+    .decision-figure strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: clamp(22px, 2.4vw, 32px);
+      font-weight: 500;
+      letter-spacing: -0.05em;
+    }
+
+    .decision-figure span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.03em;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+
+    .decision-figure.accent strong {
+      color: var(--accent-dark);
+    }
+
+    @media (max-width: 1060px) {
+      .desk {
+        grid-template-columns: 1fr;
+      }
+
+      .block-ledger {
+        position: static;
+      }
+
+      .block-ledger dl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 24px;
+      }
+
+      .block-ledger-head,
+      .ledger-stamp {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .pagewall {
+        gap: 1.5px;
+        padding: 5px;
+      }
+
+      .session-list {
+        grid-template-columns: 1fr;
+      }
+
+      .decision {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-figures {
+        max-width: 460px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .block-ledger dl {
+        display: block;
+      }
+
+      .pagewall {
+        grid-template-columns: repeat(28, minmax(0, 1fr));
+      }
+
+      .decision-figures {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="pagemem">
+
+<header class="masthead">
+  <a class="brand" href="../../index.html"><span>DASTANZAR</span> / MLSYS</a>
+  <nav aria-label="Project navigation">
+    <a href="../../index.html">Portfolio</a>
+    <a href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">Repo ↗</a>
+    <a href="https://github.com/DastanZar/pagemem/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Receipt ↗</a>
+  </nav>
+</header>
+
+<main class="shell">
+
+  <section class="scenario">
+    <div>
+      <div class="kicker"><span class="rule"></span><span class="label">pagemem / KV memory</span></div>
+      <h1>Eight conversations.<br><em>One pool.</em></h1>
+      <p class="lede">A 512-token system prompt is shared by every chat. Preallocation gives each conversation its own copy of the maximum possible tail. Paging shares the prompt once and allocates the tail on demand. The ninth user is where the difference stops being a diagram.</p>
+    </div>
+    <div class="brief">
+      <div class="label">The decision</div>
+      <p>With 504 pages in the pool, can you admit one more conversation without evicting someone?</p>
+      <div class="stamp">receipt / 204 vs 504</div>
+    </div>
+  </section>
+
+  <section class="desk-toolbar" aria-label="Allocator controls">
+    <div class="toolbar-group">
+      <div class="seg" role="group" aria-label="Allocation mode">
+        <button type="button" data-mode="prealloc" aria-pressed="false">Preallocated</button>
+        <button type="button" data-mode="paged" aria-pressed="true">Paged + COW</button>
+      </div>
+      <div class="pool-readout"><b>504 pages</b> in pool<br>16 tokens / page <span title="Allocator input, not a receipt measurement">(input)</span></div>
+    </div>
+    <div class="toolbar-group">
+      <button class="btn primary" id="admitBtn" type="button">Admit conversation</button>
+      <button class="btn" id="resetBtn" type="button">Reset workload</button>
+    </div>
+  </section>
+
+  <section class="desk">
+    <div class="stage" aria-label="KV page wall">
+      <div class="stage-head">
+        <div class="label">Page wall / live allocator</div>
+        <div class="sub" id="modeSub">PAGED + COW / 8 SESSIONS</div>
+      </div>
+      <div class="wall-wrap">
+        <div class="pagewall" id="pagewall" role="img" aria-label="KV block allocation map"></div>
+        <div class="legend">
+          <span><i class="i-prefix"></i><span id="legendPrefix">shared prompt</span></span>
+          <span id="legendPad"><i class="i-pad"></i>preallocated padding</span>
+          <span id="legendFree"><i class="i-free"></i>free page</span>
+          <span><i></i>session tail</span>
+        </div>
+      </div>
+      <div class="session-list" id="sessionList" aria-label="Session block tables"></div>
+    </div>
+
+    <aside class="block-ledger" aria-label="Allocator ledger">
+      <div class="block-ledger-head">
+        <h2>Block desk</h2>
+        <span id="ledgerMode">receipt</span>
+      </div>
+      <dl>
+        <div class="block-row"><dt>Pages in use</dt><dd class="big" id="lUsed">—</dd></div>
+        <div class="block-row"><dt>Pages free</dt><dd id="lFree">—</dd></div>
+        <div class="block-row"><dt>Conversations</dt><dd id="lSessions">—</dd></div>
+        <div class="block-row"><dt>Prefix hit rate</dt><dd id="lHit">—</dd></div>
+        <div class="block-row"><dt>Fragmentation</dt><dd id="lFrag">—</dd></div>
+        <div class="block-row"><dt>Tail waste</dt><dd id="lWaste">—</dd></div>
+      </dl>
+      <div class="ledger-stamp ok" id="ledgerStamp">Receipt workload loaded</div>
+    </aside>
+  </section>
+
+  <section class="decision" aria-label="Capacity decision">
+    <div>
+      <div class="label">The capacity read</div>
+      <h2 id="decisionHeadline">—</h2>
+      <p id="decisionBody">—</p>
+    </div>
+    <div class="decision-figures">
+      <div class="decision-figure accent">
+        <strong id="dSaved">—</strong>
+        <span>pages returned vs preallocation</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dCapacity">—</strong>
+        <span>same pool / 200-token tails</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dFrag">—</strong>
+        <span>external fragmentation</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dSessions">—</strong>
+        <span>conversations admitted</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="receipt-note">
+    <span>Source <b>receipts/receipt.json</b></span>
+    <span>Baseline <b>8 sessions / 512-token shared prompt</b></span>
+    <span>Pool <b>504 pages / 16-token input</b></span>
+    <a href="https://github.com/DastanZar/pagemem/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Open receipt ↗</a>
+  </div>
+</main>
+
+<footer class="footer">
+  <span>pagemem / block desk</span>
+  <span>Receipt values are exact; block size, tail lengths, and added-session capacity are allocator inputs or derived models.</span>
+</footer>
+
+<script>
+(() => {
+  const DATA = window.PAGEMEM_DATA || {};
+  const A = DATA.allocator || {};
+  const BUDGET = A.blocks_preallocated_baseline || 504;
+  const BLOCK = 16;
+  const PREFIX_TOKENS = A.shared_system_prompt_tokens || 512;
+  const PREFIX_PAGES = Math.ceil(PREFIX_TOKENS / BLOCK);
+  const INITIAL_TAILS = [200, 240, 280, 320, 360, 400, 440, 480];
+  const PREALLOC_PER_SESSION = Math.ceil((A.blocks_preallocated_baseline || 504) / (A.sequences || INITIAL_TAILS.length));
+  const NEW_TAIL = 200;
+  const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  const $ = (id) => document.getElementById(id);
+  const wall = $("pagewall");
+  const list = $("sessionList");
+  const modeSub = $("modeSub");
+  const ledgerMode = $("ledgerMode");
+  const stamp = $("ledgerStamp");
+
+  const state = {
+    mode: "paged",
+    sessions: INITIAL_TAILS.map((tail, index) => ({ id: LETTERS[index], tail, added: false })),
+    rejected: false,
+    lastAdded: [],
+  };
+
+  const fmt = (value, digits = 0) => Number(value).toLocaleString("en-US", { maximumFractionDigits: digits, minimumFractionDigits: digits });
+  const pct = (value) => (value * 100).toFixed(1).replace(/\.0$/, "") + "%";
+  const pct2 = (value) => (value * 100).toFixed(2) + "%";
+
+  function pagesFor(tail) {
+    return Math.ceil(tail / BLOCK);
+  }
+
+  function usedPages() {
+    if (!state.sessions.length) return 0;
+    if (state.mode === "paged") {
+      return PREFIX_PAGES + state.sessions.reduce((sum, session) => sum + pagesFor(session.tail), 0);
+    }
+    return state.sessions.length * PREALLOC_PER_SESSION;
+  }
+
+  function occupancyTokens() {
+    return state.sessions.reduce((sum, session) => {
+      return sum + (state.mode === "paged" ? 0 : PREFIX_TOKENS) + session.tail;
+    }, state.mode === "paged" && state.sessions.length ? PREFIX_TOKENS : 0);
+  }
+
+  function capacityTokens() {
+    return usedPages() * BLOCK;
+  }
+
+  function fragmentation() {
+    if (!usedPages()) return 0;
+    return Math.max(0, 1 - occupancyTokens() / capacityTokens());
+  }
+
+  function canAdmit() {
+    const needed = state.mode === "paged" ? pagesFor(NEW_TAIL) : PREALLOC_PER_SESSION;
+    return usedPages() + needed <= BUDGET;
+  }
+
+  function maxSessionsFor(mode) {
+    if (mode === "prealloc") return Math.floor(BUDGET / PREALLOC_PER_SESSION);
+    const base = PREFIX_PAGES + INITIAL_TAILS.reduce((sum, tail) => sum + pagesFor(tail), 0);
+    return INITIAL_TAILS.length + Math.floor((BUDGET - base) / pagesFor(NEW_TAIL));
+  }
+
+  function toneFor(index) {
+    return "tone-" + ((index % 7) + 1);
+  }
+
+  function renderWall() {
+    wall.innerHTML = "";
+    const used = usedPages();
+    const fragments = [];
+    const addedSet = new Set(state.lastAdded);
+
+    if (state.mode === "paged") {
+      for (let i = 0; i < PREFIX_PAGES; i += 1) {
+        fragments.push({ type: "prefix", label: `Shared system prompt / page ${i + 1} / refcount ${state.sessions.length}` });
+      }
+      state.sessions.forEach((session, index) => {
+        const pages = pagesFor(session.tail);
+        for (let i = 0; i < pages; i += 1) {
+          fragments.push({
+            type: "used " + toneFor(index),
+            label: `${session.id} / tail page ${i + 1} / ${session.tail} tokens`,
+            added: addedSet.has(session.id),
+          });
+        }
+      });
+      for (let i = used; i < BUDGET; i += 1) {
+        fragments.push({ type: "free", label: `Free page ${i + 1}` });
+      }
+    } else {
+      state.sessions.forEach((session, index) => {
+        const pages = PREALLOC_PER_SESSION;
+        for (let i = 0; i < pages; i += 1) {
+          const isPrefix = i < PREFIX_PAGES;
+          const isPadding = i >= Math.ceil((PREFIX_TOKENS + session.tail) / BLOCK);
+          fragments.push({
+            type: isPrefix ? "prefix" : (isPadding ? "padding" : "used " + toneFor(index)),
+            label: `${session.id} / ${isPrefix ? "own prompt copy" : (isPadding ? "reserved padding" : "tail")} / page ${i + 1}`,
+            added: addedSet.has(session.id),
+          });
+        }
+      });
+      for (let i = used; i < BUDGET; i += 1) {
+        fragments.push({ type: "free", label: `Free page ${i + 1}` });
+      }
+    }
+
+    const fragment = document.createDocumentFragment();
+    fragments.slice(0, BUDGET).forEach((item) => {
+      const cell = document.createElement("span");
+      cell.className = "page " + item.type + (item.added ? " new" : "");
+      cell.title = item.label;
+      fragment.appendChild(cell);
+    });
+    wall.appendChild(fragment);
+
+    modeSub.textContent = state.mode === "paged"
+      ? `PAGED + COW / ${state.sessions.length} SESSIONS`
+      : `PREALLOCATED / ${state.sessions.length} SESSIONS`;
+    $("legendPrefix").textContent = state.mode === "paged" ? "shared prompt" : "own prompt copy";
+    $("legendPad").style.display = state.mode === "paged" ? "none" : "inline-flex";
+    $("legendFree").style.display = state.mode === "paged" ? "inline-flex" : "none";
+  }
+
+  function renderSessions() {
+    list.innerHTML = "";
+    state.sessions.forEach((session, index) => {
+      const line = document.createElement("div");
+      line.className = "session-line";
+      const pageCount = state.mode === "paged" ? pagesFor(session.tail) : PREALLOC_PER_SESSION;
+      const width = Math.min(100, pageCount / PREALLOC_PER_SESSION * 100);
+      line.innerHTML = `
+        <span class="id">${session.id}</span>
+        <span class="bar"><i style="width:${width}%;background:${state.mode === "paged" ? "var(--ink)" : "var(--sage)"}"></i></span>
+        <span class="num">${pageCount} p</span>
+      `;
+      list.appendChild(line);
+    });
+    if (state.rejected) {
+      const line = document.createElement("div");
+      line.className = "session-line rejected";
+      line.innerHTML = `<span class="id">${LETTERS[state.sessions.length] || "?"}</span><span class="bar"><i style="width:100%"></i></span><span class="num">rejected</span>`;
+      list.appendChild(line);
+    }
+  }
+
+  function renderLedger() {
+    const used = usedPages();
+    const free = Math.max(0, BUDGET - used);
+    const frag = fragmentation();
+    const hit = state.mode === "paged" && state.sessions.length > 1 ? 1 : 0;
+    const waste = Math.max(0, used * BLOCK - occupancyTokens());
+
+    $("lUsed").textContent = `${fmt(used)} / ${fmt(BUDGET)}`;
+    $("lFree").textContent = fmt(free);
+    $("lSessions").textContent = fmt(state.sessions.length);
+    $("lHit").textContent = state.mode === "paged" ? hit.toFixed(2) : "0.00";
+    $("lFrag").innerHTML = state.mode === "paged" && state.sessions.length === 8
+      ? `${pct2(frag)}<small>receipt 0.0098</small>`
+      : `${pct2(frag)}<small>${state.mode === "paged" ? "live allocator" : "derived"}</small>`;
+    $("lWaste").innerHTML = `${fmt(waste)} tokens<small>${state.mode === "paged" && state.sessions.length === 8 ? "receipt" : "derived"}</small>`;
+    ledgerMode.textContent = state.sessions.length === 8 && state.mode === "paged" ? "receipt" : "live";
+
+    $("dSaved").textContent = `${pct(1 - used / BUDGET)}`;
+    $("dCapacity").textContent = `${maxSessionsFor("paged")} vs ${maxSessionsFor("prealloc")}`;
+    $("dFrag").textContent = pct2(frag);
+    $("dSessions").textContent = fmt(state.sessions.length);
+
+    if (state.rejected) {
+      stamp.className = "ledger-stamp reject";
+      stamp.textContent = state.mode === "prealloc"
+        ? "Pool exhausted / 9th locked out"
+        : "Pool exhausted / no free pages";
+    } else if (state.mode === "prealloc") {
+      stamp.className = "ledger-stamp";
+      stamp.textContent = "8 × own prompt copy / 504 reserved";
+    } else {
+      stamp.className = "ledger-stamp ok";
+      stamp.textContent = `${fmt(free)} pages left / prefix shared ×${state.sessions.length}`;
+    }
+
+    const ninth = state.sessions.length >= 9;
+    if (state.mode === "prealloc") {
+      $("decisionHeadline").innerHTML = ninth
+        ? `The ninth conversation is <em>locked out.</em>`
+        : `The pool is <em>already reserved.</em>`;
+      $("decisionBody").textContent = "Every conversation gets its own copy of the shared prompt and a tail sized for the worst case. At 504 pages, that is eight conversations and no room for a ninth — even though the actual tails leave most of those pages empty.";
+    } else {
+      $("decisionHeadline").innerHTML = ninth
+        ? `The ninth conversation <em>fits.</em>`
+        : `Eight conversations, <em>300 pages left.</em>`;
+      $("decisionBody").textContent = "The system prompt is stored once and its pages are reference-counted. Tails are allocated on demand. The same 504-page pool that preallocation fills with eight conversations can hold 31 when every new tail is 200 tokens — 3.9× the concurrency from the same memory.";
+    }
+  }
+
+  function render() {
+    renderWall();
+    renderSessions();
+    renderLedger();
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    document.querySelectorAll("[data-mode]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+    });
+    state.sessions = INITIAL_TAILS.map((tail, index) => ({ id: LETTERS[index], tail, added: false }));
+    state.rejected = false;
+    state.lastAdded = [];
+    render();
+  }
+
+  function admit() {
+    if (!canAdmit()) {
+      state.rejected = true;
+      render();
+      stamp.classList.remove("reject");
+      void stamp.offsetWidth;
+      stamp.classList.add("reject");
+      return;
+    }
+    const id = LETTERS[state.sessions.length] || String(state.sessions.length + 1);
+    state.sessions.push({ id, tail: NEW_TAIL, added: true });
+    state.lastAdded = [id];
+    state.rejected = false;
+    render();
+  }
+
+  document.querySelectorAll("[data-mode]").forEach((button) => {
+    button.addEventListener("click", () => setMode(button.dataset.mode));
+  });
+  $("admitBtn").addEventListener("click", admit);
+  $("resetBtn").addEventListener("click", () => setMode(state.mode));
+
+  setMode("paged");
+})();
+</script>
+</body>
+</html>

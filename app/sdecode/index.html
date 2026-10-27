@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="sdecode target-call budget: run a measured speculative-decoding session and price the target calls it removes.">
+  <title>sdecode — target-call budget</title>
+  <link rel="stylesheet" href="../_base.css">
+  <script src="data.js"></script>
+  <style>
+    .sdecode .scenario h1 {
+      max-width: 980px;
+    }
+
+    .sdecode .lede {
+      max-width: 700px;
+      margin-top: 20px;
+      color: var(--ink-soft);
+      font-size: clamp(16px, 1.5vw, 19px);
+      line-height: 1.45;
+    }
+
+    .sdecode .lede b {
+      font-weight: 600;
+    }
+
+    .control-deck {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr) minmax(0, 0.75fr) minmax(0, 0.75fr) auto;
+      gap: 14px;
+      align-items: end;
+      padding: 15px 0 16px;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .price-control {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .price-control .unit {
+      padding: 9px 0 8px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .session-actions {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.45fr);
+      gap: clamp(18px, 3vw, 42px);
+      align-items: start;
+      padding: 24px 0 12px;
+    }
+
+    .session {
+      min-width: 0;
+      border-top: 1px solid var(--ink);
+    }
+
+    .session-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .live {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .live i {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .live[data-state="running"] i {
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(233, 73, 27, 0.12);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .live[data-state="done"] i {
+      background: var(--green);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .prompt-block {
+      position: relative;
+      padding: 14px 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .prompt-block .label {
+      margin-bottom: 8px;
+    }
+
+    .prompt-text {
+      max-width: 880px;
+      color: var(--muted);
+      font-family: var(--serif);
+      font-size: clamp(20px, 2.2vw, 27px);
+      line-height: 1.25;
+    }
+
+    .output-shell {
+      min-height: 184px;
+      padding: 18px 0 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .output-shell > .label {
+      margin-bottom: 7px;
+    }
+
+    .output {
+      max-width: 880px;
+      min-height: 108px;
+      font-family: var(--mono);
+      font-size: clamp(15px, 1.5vw, 18px);
+      line-height: 1.65;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .output .accepted {
+      background: rgba(170, 182, 160, 0.34);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    .output .target {
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
+    .output .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1.1em;
+      background: var(--accent);
+      vertical-align: -0.18em;
+      animation: blink 1s steps(2, end) infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .round-stage {
+      padding: 14px 0 4px;
+    }
+
+    .round-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .round-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .round-title b {
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
+    .round-count {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      min-height: 31px;
+    }
+
+    .chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      max-width: 190px;
+      padding: 5px 7px;
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.1;
+      white-space: pre;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      transform: translateY(4px);
+      animation: chip-in 180ms ease forwards;
+    }
+
+    .chip.ok {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .chip.no {
+      border-color: var(--line);
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: var(--accent);
+    }
+
+    .chip.target-chip {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--paper);
+      text-decoration: none;
+    }
+
+    .chip .tick {
+      margin-right: 4px;
+      color: var(--accent);
+      font-size: 10px;
+    }
+
+    .chip.ok .tick {
+      color: var(--sage);
+    }
+
+    @keyframes chip-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .round-ledger {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .round-ledger b {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .history {
+      display: flex;
+      align-items: end;
+      gap: 2px;
+      min-height: 35px;
+      padding-top: 12px;
+      overflow-x: auto;
+      border-top: 1px solid var(--line);
+    }
+
+    .history i {
+      display: block;
+      width: 5px;
+      min-height: 3px;
+      background: var(--line-strong);
+      transition: background 120ms ease, height 180ms ease;
+    }
+
+    .history i.ok {
+      background: var(--sage);
+    }
+
+    .history i.now {
+      background: var(--accent);
+    }
+
+    .ledger-panel {
+      position: sticky;
+      top: 18px;
+      padding: 18px 18px 16px;
+    }
+
+    .ledger-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+
+    .ledger-head h2 {
+      font-family: var(--serif);
+      font-size: 31px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .ledger-head span {
+      color: var(--sage);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .ledger .ledger-row dd {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ledger .ledger-row dd small {
+      display: block;
+      margin-top: 3px;
+      color: var(--sage);
+      font-family: var(--sans);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .ledger-note {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(239, 234, 221, 0.16);
+      color: var(--sage);
+      font-family: var(--mono);
+      font-size: 9px;
+      line-height: 1.55;
+    }
+
+    .ledger-note b {
+      color: var(--cream);
+      font-weight: 500;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+      gap: clamp(20px, 4vw, 60px);
+      align-items: start;
+      margin-top: 18px;
+      padding: 22px 0 30px;
+      border-top: 1px solid var(--ink);
+    }
+
+    .decision .label {
+      margin-bottom: 8px;
+    }
+
+    .decision h2 {
+      max-width: 860px;
+      font-family: var(--serif);
+      font-size: clamp(31px, 4.3vw, 57px);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+    }
+
+    .decision h2 em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .decision p {
+      margin-top: 13px;
+      max-width: 620px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .decision-figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding-top: 5px;
+    }
+
+    .decision-figure {
+      border-top: 1px solid var(--ink);
+      padding-top: 8px;
+    }
+
+    .decision-figure strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: clamp(22px, 2.4vw, 32px);
+      font-weight: 500;
+      letter-spacing: -0.05em;
+    }
+
+    .decision-figure span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.03em;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+
+    .decision-figure.accent strong {
+      color: var(--accent-dark);
+    }
+
+    @media (max-width: 1060px) {
+      .control-deck {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .session-actions {
+        grid-column: span 2;
+      }
+
+      .workbench {
+        grid-template-columns: 1fr;
+      }
+
+      .ledger-panel {
+        position: static;
+      }
+
+      .ledger {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 24px;
+      }
+
+      .ledger-head,
+      .ledger .ledger-note {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .control-deck {
+        grid-template-columns: 1fr;
+      }
+
+      .session-actions {
+        grid-column: auto;
+        flex-wrap: wrap;
+      }
+
+      .decision {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-figures {
+        max-width: 460px;
+      }
+
+      .output-shell {
+        min-height: 150px;
+      }
+
+      .history {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .ledger {
+        display: block;
+      }
+
+      .decision-figures {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="sdecode">
+
+<header class="masthead">
+  <a class="brand" href="../../index.html"><span>DASTANZAR</span> / MLSYS</a>
+  <nav aria-label="Project navigation">
+    <a href="../../index.html">Portfolio</a>
+    <a href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">Repo ↗</a>
+    <a href="https://github.com/DastanZar/sdecode/blob/main/receipts/real_run.json" target="_blank" rel="noopener">Receipt ↗</a>
+  </nav>
+</header>
+
+<main class="shell">
+
+  <section class="scenario">
+    <div>
+      <div class="kicker"><span class="rule"></span><span class="label">sdecode / speculative decoding</span></div>
+      <h1>Every target call<br><em>has a price.</em></h1>
+      <p class="lede">A speculative decoder drafts a short run, then asks the target model to verify it. The win is not “more tokens per second” on every machine. The win is <b>fewer expensive target calls</b> for the same tokens. This is the session that sends the bill.</p>
+    </div>
+    <div class="brief">
+      <div class="label">The decision</div>
+      <p>Given your target-call price, does drafting cut the cost of a million output tokens enough to deploy?</p>
+      <div class="stamp">token-identical</div>
+    </div>
+  </section>
+
+  <section class="control-deck" aria-label="Session controls">
+    <div class="control">
+      <label class="label" for="pairSel">Target / drafter</label>
+      <select id="pairSel"></select>
+    </div>
+    <div class="control">
+      <label class="label" for="promptSel">Session prompt</label>
+      <select id="promptSel"></select>
+    </div>
+    <div class="control">
+      <label class="label" for="laneSel">Draft policy</label>
+      <select id="laneSel">
+        <option value="fixed_k8">Fixed K = 8</option>
+        <option value="adaptive">Adaptive K</option>
+        <option value="adaptive_calibrated">Adaptive, calibrated</option>
+      </select>
+    </div>
+    <div class="price-control">
+      <div class="control">
+        <label class="label" for="priceInput">Target price</label>
+        <input id="priceInput" type="number" min="0.00001" step="0.0001" value="0.001" inputmode="decimal" aria-describedby="priceUnit">
+      </div>
+      <span class="unit" id="priceUnit">$ / call</span>
+    </div>
+    <div class="session-actions">
+      <button class="btn primary" id="playBtn" type="button">Run session</button>
+      <button class="btn" id="stepBtn" type="button">Step</button>
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+  </section>
+
+  <section class="workbench">
+    <div class="session" aria-label="Recorded session">
+      <div class="session-head">
+        <div class="label">Session tape / measured real run</div>
+        <div class="live" id="liveState" data-state="idle"><i></i><span>ready</span></div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="label">Prompt</div>
+        <div class="prompt-text" id="promptText"></div>
+      </div>
+
+      <div class="output-shell">
+        <div class="label">Output</div>
+        <div class="output" id="output" aria-live="polite"></div>
+      </div>
+
+      <div class="round-stage">
+        <div class="round-top">
+          <div class="round-title" id="roundTitle">Round <b>—</b></div>
+          <div class="round-count" id="roundCount">— / —</div>
+        </div>
+        <div class="chips" id="chips" aria-label="Draft tokens for the current round"></div>
+        <div class="round-ledger">
+          <span>DRAFTED <b id="rlDrafted">—</b></span>
+          <span>ACCEPTED <b id="rlAccepted">—</b></span>
+          <span>TARGET CALL <b id="rlCall">—</b></span>
+          <span>ROUND WALL <b id="rlWall">—</b></span>
+        </div>
+        <div class="history" id="history" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <aside class="ledger ledger-panel" aria-label="Target-call ledger">
+      <div class="ledger-head">
+        <h2>Ledger</h2>
+        <span id="ledgerMode">projected</span>
+      </div>
+      <dl style="margin:0;">
+        <div class="ledger-row"><dt>Target calls</dt><dd class="big" id="lCalls">—</dd></div>
+        <div class="ledger-row"><dt>Tokens / call</dt><dd id="lTpc">—</dd></div>
+        <div class="ledger-row"><dt>Calls / 1M tokens</dt><dd id="lCallsM">—</dd></div>
+        <div class="ledger-row"><dt>Target spend / 1M</dt><dd class="accent" id="lCost">—</dd></div>
+        <div class="ledger-row"><dt>Vs naive</dt><dd id="lSave">—</dd></div>
+        <div class="ledger-row"><dt>Token identity</dt><dd id="lIdentity">—</dd></div>
+      </dl>
+      <div class="ledger-note" id="ledgerNote">Price is a model input, not a measurement. The measured run is CPU; target-call savings apply when target calls are the constrained resource.</div>
+    </aside>
+  </section>
+
+  <section class="decision" aria-label="Deployment decision">
+    <div>
+      <div class="label">The deployment read</div>
+      <h2 id="decisionHeadline">—</h2>
+      <p id="decisionBody">—</p>
+    </div>
+    <div class="decision-figures">
+      <div class="decision-figure accent">
+        <strong id="dSpend">—</strong>
+        <span>target spend / 1M tokens</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dSaved">—</strong>
+        <span>target calls removed / 1M</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dPair">—</strong>
+        <span>pair mean tokens / call</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dCalls">—</strong>
+        <span>calls in this session</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="receipt-note">
+    <span>Source <b>receipts/real_run.json</b></span>
+    <span>Harness <b id="harnessStamp">—</b></span>
+    <span>Measured on <b id="machineLabel">CPU / HF GPT-2</b></span>
+    <a href="https://github.com/DastanZar/sdecode/blob/main/receipts/real_run.json" target="_blank" rel="noopener">Open receipt ↗</a>
+  </div>
+</main>
+
+<footer class="footer">
+  <span>sdecode / session runner</span>
+  <span>Numbers from the committed real-run receipt. No GPU claims.</span>
+</footer>
+
+<script>
+(() => {
+  const DATA = window.SDECODE_DATA || { experiments: [] };
+  const EXPS = DATA.experiments || [];
+  const $ = (id) => document.getElementById(id);
+
+  const pairSel = $("pairSel");
+  const promptSel = $("promptSel");
+  const laneSel = $("laneSel");
+  const priceInput = $("priceInput");
+  const playBtn = $("playBtn");
+  const stepBtn = $("stepBtn");
+  const resetBtn = $("resetBtn");
+
+  const output = $("output");
+  const chips = $("chips");
+  const history = $("history");
+  const promptText = $("promptText");
+  const roundTitle = $("roundTitle");
+  const roundCount = $("roundCount");
+  const liveState = $("liveState");
+
+  const state = {
+    pair: 0,
+    prompt: 0,
+    lane: "fixed_k8",
+    round: 0,
+    calls: 0,
+    tokens: 0,
+    started: false,
+    playing: false,
+    finished: false,
+    timer: null,
+  };
+
+  const fmtInt = (value) => Math.round(value).toLocaleString("en-US");
+  const fmtMoney = (value) => {
+    if (value >= 100) return "$" + value.toLocaleString("en-US", { maximumFractionDigits: 0 });
+    if (value >= 1) return "$" + value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+    return "$" + value.toLocaleString("en-US", { maximumFractionDigits: 4 });
+  };
+  const fmtNum = (value, digits = 2) => Number(value).toLocaleString("en-US", { maximumFractionDigits: digits, minimumFractionDigits: digits });
+  const esc = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+  const displayPiece = (value) => String(value).replace(/\n/g, "↵").replace(/\t/g, "⇥");
+
+  function pair() { return EXPS[state.pair]; }
+  function prompt() { return pair().prompts[state.prompt]; }
+  function run() { return prompt()[state.lane]; }
+  function identityFlag() {
+    const p = prompt();
+    if (state.lane === "fixed_k8") return p.identity.fixed_k8_matches_naive;
+    if (state.lane === "adaptive_calibrated") return p.identity.adaptive_calibrated_matches_naive;
+    return p.identity.adaptive_matches_naive;
+  }
+  function pairMean() {
+    const key = state.lane;
+    const values = pair().prompts.map((p) => p[key].tokens_per_target_forward);
+    return values.reduce((a, b) => a + b, 0) / values.length;
+  }
+  function price() { return Math.max(Number(priceInput.value) || 0, 0); }
+
+  function fillPairs() {
+    pairSel.innerHTML = EXPS.map((experiment, index) =>
+      `<option value="${index}">${esc(experiment.target)} ← ${esc(experiment.drafter)}</option>`
+    ).join("");
+    pairSel.value = String(state.pair);
+  }
+
+  function fillPrompts() {
+    promptSel.innerHTML = pair().prompts.map((p, index) =>
+      `<option value="${index}">${esc(p.name)} / ${p.prompt_tokens} prompt tokens</option>`
+    ).join("");
+    promptSel.value = String(state.prompt);
+  }
+
+  function resetSession() {
+    if (state.timer) clearTimeout(state.timer);
+    state.round = 0;
+    state.calls = 0;
+    state.tokens = 0;
+    state.started = false;
+    state.playing = false;
+    state.finished = false;
+    state.timer = null;
+    playBtn.textContent = "Run session";
+    promptText.textContent = prompt().prompt;
+    output.innerHTML = '<span class="cursor"></span>';
+    chips.innerHTML = "";
+    history.innerHTML = "";
+    roundTitle.innerHTML = "Round <b>—</b>";
+    roundCount.textContent = `0 / ${run().rounds.length}`;
+    $("rlDrafted").textContent = "—";
+    $("rlAccepted").textContent = "—";
+    $("rlCall").textContent = "—";
+    $("rlWall").textContent = "—";
+    liveState.dataset.state = "idle";
+    liveState.querySelector("span").textContent = "ready";
+    $("ledgerMode").textContent = "projected";
+    $("harnessStamp").textContent = DATA.harness ? DATA.harness.timestamp : "—";
+    $("machineLabel").textContent = `CPU / HF ${pair().target}`;
+    renderLedger(true);
+    renderRound(run().rounds[0], true);
+  }
+
+  function renderRound(round, preview = false) {
+    chips.innerHTML = "";
+    if (!round) {
+      chips.innerHTML = '<span class="label" style="padding:7px 0;">Press run or step to stream a round.</span>';
+      return;
+    }
+    const accepted = Math.max(0, Math.min(round.accepted, round.draft_pieces.length));
+    round.draft_pieces.forEach((piece, index) => {
+      const node = document.createElement("span");
+      const ok = index < accepted;
+      node.className = "chip " + (ok ? "ok" : "no");
+      node.style.animationDelay = `${Math.min(index * 34, 260)}ms`;
+      node.title = ok ? "Accepted draft token" : "Rejected draft token";
+      node.innerHTML = `<span class="tick">${ok ? "✓" : "×"}</span>${esc(displayPiece(piece))}`;
+      chips.appendChild(node);
+    });
+    const targetPiece = round.emitted_pieces && round.emitted_pieces.length > accepted
+      ? round.emitted_pieces[accepted]
+      : "";
+    if (targetPiece !== undefined && targetPiece !== "") {
+      const node = document.createElement("span");
+      node.className = "chip target-chip";
+      node.style.animationDelay = `${Math.min(round.draft_pieces.length * 34 + 40, 330)}ms`;
+      node.title = "Token emitted by the target model";
+      node.innerHTML = `<span class="tick">→</span>${esc(displayPiece(targetPiece))}`;
+      chips.appendChild(node);
+    }
+    roundTitle.innerHTML = preview ? `Round <b>1</b> / preview` : `Round <b>${round.round}</b>`;
+    roundCount.textContent = preview ? `0 / ${run().rounds.length}` : `${round.round} / ${run().rounds.length}`;
+    $("rlDrafted").textContent = String(round.draft_pieces.length);
+    $("rlAccepted").textContent = String(round.accepted);
+    $("rlCall").textContent = preview ? "—" : `#${state.calls}`;
+    $("rlWall").textContent = preview ? "—" : `${Math.round(round.wall_ms).toLocaleString("en-US")} ms`;
+  }
+
+  function appendRound(round) {
+    const accepted = Math.max(0, Math.min(round.accepted, round.draft_pieces.length));
+    const emitted = round.emitted_pieces || [];
+    const acceptedPieces = emitted.slice(0, accepted);
+    const targetPiece = emitted[accepted] !== undefined ? emitted[accepted] : "";
+    acceptedPieces.forEach((piece) => {
+      if (!piece) return;
+      const span = document.createElement("span");
+      span.className = "accepted";
+      span.textContent = piece;
+      output.appendChild(span);
+      state.tokens += 1;
+    });
+    if (targetPiece) {
+      const span = document.createElement("span");
+      span.className = "target";
+      span.textContent = targetPiece;
+      output.appendChild(span);
+      state.tokens += 1;
+    }
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    output.appendChild(cursor);
+  }
+
+  function addHistory(round) {
+    const bar = document.createElement("i");
+    const maxK = Math.max(...run().rounds.map((r) => r.k), 1);
+    bar.style.height = `${8 + (round.accepted / maxK) * 24}px`;
+    bar.className = round.accepted > 0 ? "ok" : "";
+    bar.title = `Round ${round.round}: ${round.accepted}/${round.k} accepted`;
+    history.appendChild(bar);
+    history.scrollLeft = history.scrollWidth;
+  }
+
+  function step() {
+    const rounds = run().rounds;
+    if (state.round >= rounds.length) {
+      finish();
+      return;
+    }
+    if (state.finished) return;
+    if (!state.started) {
+      state.started = true;
+      output.innerHTML = "";
+      liveState.dataset.state = "running";
+      liveState.querySelector("span").textContent = "streaming";
+      $("ledgerMode").textContent = "live";
+    }
+    const round = rounds[state.round];
+    state.calls += 1;
+    state.round += 1;
+    appendRound(round);
+    addHistory(round);
+    renderRound(round);
+    renderLedger(false);
+    if (state.round >= rounds.length) finish();
+  }
+
+  function finish() {
+    state.finished = true;
+    state.playing = false;
+    if (state.timer) clearTimeout(state.timer);
+    state.timer = null;
+    output.textContent = run().text;
+    playBtn.textContent = "Run again";
+    liveState.dataset.state = "done";
+    liveState.querySelector("span").textContent = "complete";
+    $("ledgerMode").textContent = "receipt";
+    renderLedger(false);
+    renderRound(run().rounds[run().rounds.length - 1]);
+    roundCount.textContent = `${run().rounds.length} / ${run().rounds.length}`;
+  }
+
+  function play() {
+    if (state.playing) {
+      state.playing = false;
+      if (state.timer) clearTimeout(state.timer);
+      state.timer = null;
+      playBtn.textContent = "Resume";
+      liveState.querySelector("span").textContent = "paused";
+      return;
+    }
+    if (state.finished) {
+      resetSession();
+    }
+    state.playing = true;
+    playBtn.textContent = "Pause";
+    const tick = () => {
+      if (!state.playing) return;
+      step();
+      if (state.playing && !state.finished) {
+        state.timer = setTimeout(tick, 300);
+      }
+    };
+    tick();
+  }
+
+  function renderLedger(projected) {
+    const r = run();
+    const p = prompt();
+    const n = r.n_tokens;
+    const calls = projected ? r.target_forwards : state.calls;
+    const tokens = projected ? n : Math.max(state.tokens, 1);
+    const tpc = projected ? r.tokens_per_target_forward : tokens / Math.max(calls, 1);
+    const callsPerM = calls / Math.max(tokens, 1) * 1_000_000;
+    const cost = callsPerM / 1_000_000 * 1_000_000 * price();
+    const naiveCost = 1_000_000 * price();
+    const savings = 1 - cost / naiveCost;
+    const identity = identityFlag();
+
+    $("lCalls").textContent = fmtInt(calls);
+    $("lTpc").innerHTML = `${fmtNum(tpc)}<small>${projected ? "receipt" : "this session"}</small>`;
+    $("lCallsM").innerHTML = `${fmtInt(callsPerM)}<small>per 1M output tokens</small>`;
+    $("lCost").textContent = fmtMoney(cost);
+    $("lSave").textContent = savings >= 0 ? `−${Math.round(savings * 100)}%` : `+${Math.round(-savings * 100)}%`;
+    $("lIdentity").textContent = identity ? "yes" : "no";
+
+    $("dSpend").textContent = fmtMoney(cost);
+    $("dSaved").textContent = fmtInt((1 - calls / Math.max(tokens, 1)) * 1_000_000);
+    $("dPair").textContent = `${fmtNum(pairMean())} t/call`;
+    $("dCalls").textContent = fmtInt(calls);
+
+    const policy = laneSel.options[laneSel.selectedIndex].text;
+    const pairName = `${pair().target} ← ${pair().drafter}`;
+    const waste = Math.max(0, 1 - calls / Math.max(tokens, 1));
+    $("decisionHeadline").innerHTML = `At ${fmtMoney(price())} per target call, ${esc(policy)} turns a <em>${fmtMoney(naiveCost)}</em> target bill into <em>${fmtMoney(cost)}</em> per million tokens.`;
+    $("decisionBody").textContent = `${fmtInt(waste * 1_000_000)} target calls disappear for every million output tokens on ${pairName}. That is the deployment case: same generated tokens, fewer verification calls. The measured CPU wall-clock is slower; if target calls are not the constrained resource, this does not buy latency.`;
+  }
+
+  function rebuildPrompts() {
+    fillPrompts();
+    resetSession();
+  }
+
+  pairSel.addEventListener("change", () => {
+    state.pair = Number(pairSel.value);
+    state.prompt = 0;
+    rebuildPrompts();
+  });
+  promptSel.addEventListener("change", () => {
+    state.prompt = Number(promptSel.value);
+    resetSession();
+  });
+  laneSel.addEventListener("change", () => {
+    state.lane = laneSel.value;
+    resetSession();
+  });
+  priceInput.addEventListener("input", () => renderLedger(!state.started || state.finished));
+  playBtn.addEventListener("click", play);
+  stepBtn.addEventListener("click", () => {
+    if (state.playing) {
+      state.playing = false;
+      if (state.timer) clearTimeout(state.timer);
+      playBtn.textContent = "Resume";
+    }
+    step();
+  });
+  resetBtn.addEventListener("click", resetSession);
+
+  fillPairs();
+  fillPrompts();
+  resetSession();
+})();
+</script>
+</body>
+</html>

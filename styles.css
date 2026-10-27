@@ -1258,6 +1258,214 @@ article[id],
   transform: translate(3px, -3px);
 }
 
+/* --------------------------------------------------------------------------
+   Full inventory
+-------------------------------------------------------------------------- */
+.inventory {
+  background: var(--paper);
+}
+
+.inventory-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: clamp(48px, 6vw, 74px);
+  border: 1px solid var(--line-strong);
+  background: var(--line-strong);
+}
+
+.inventory-meta div {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+  padding: 13px 16px;
+  background: var(--paper);
+}
+
+.inventory-meta b {
+  color: var(--accent);
+  font: 600 26px / 1 var(--sans);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.inventory-meta span {
+  color: var(--muted);
+  font: 8px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inventory-theme {
+  position: relative;
+  padding-top: 24px;
+  border-top: 1px solid var(--line-strong);
+}
+
+.inventory-theme + .inventory-theme {
+  margin-top: clamp(46px, 6vw, 72px);
+}
+
+.inventory-theme-head {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) minmax(280px, 0.78fr);
+  gap: clamp(14px, 2.4vw, 34px);
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.inventory-theme-no {
+  padding-top: 8px;
+  color: var(--accent-dark);
+  font: 9px var(--mono);
+  letter-spacing: 0.1em;
+}
+
+.inventory-theme-head h3 {
+  margin: 0;
+  color: var(--ink);
+  font: 600 clamp(26px, 3vw, 38px) / 0.96 var(--sans);
+  letter-spacing: -0.05em;
+}
+
+.inventory-theme-head p {
+  max-width: 42ch;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.inventory-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 236px;
+  flex-direction: column;
+  overflow: clip;
+  padding: 18px 17px 15px;
+  background: var(--paper-2);
+  transition: background 0.22s, box-shadow 0.22s;
+}
+
+.inventory-card:hover,
+.inventory-card:focus-within {
+  background: var(--paper);
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+.inventory-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inventory-no {
+  color: var(--accent-dark);
+  font: 9px var(--mono);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.inventory-cat {
+  max-width: 16ch;
+  color: var(--muted);
+  font: 8px / 1.3 var(--mono);
+  letter-spacing: 0.07em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.inventory-card h4 {
+  margin: 17px 0 8px;
+  color: var(--ink);
+  font: 600 clamp(21px, 1.8vw, 27px) / 1 var(--sans);
+  letter-spacing: -0.045em;
+}
+
+.inventory-card h4 a {
+  color: inherit;
+  transition: color 0.2s;
+}
+
+.inventory-card h4 a:hover,
+.inventory-card h4 a:focus-visible {
+  color: var(--accent-dark);
+}
+
+.inventory-claim {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font: 400 16px / 1.2 var(--serif);
+  letter-spacing: -0.015em;
+}
+
+.inventory-claim strong {
+  margin-right: 0.03em;
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 1.32em;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  vertical-align: -0.04em;
+}
+
+.inventory-claim i {
+  padding: 0 3px;
+  color: var(--line-strong);
+  font-style: normal;
+}
+
+.inventory-desc {
+  margin: 0 0 15px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.52;
+}
+
+.inventory-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px 12px;
+  margin-top: auto;
+}
+
+.inventory-links .text-link {
+  font-size: 8px;
+}
+
+.inventory-app {
+  margin-left: auto;
+  padding: 3px 6px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font: 8px var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.inventory-app:hover,
+.inventory-app:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+}
+
 /* Floating evidence preview for the shipping index. */
 .cursor-preview {
   position: fixed;
@@ -2105,6 +2313,23 @@ pre#receiptJson code {
     border-left: 0;
   }
 
+  .inventory-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-theme-head {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .inventory-theme-head p {
+    grid-column: 2;
+    max-width: 54ch;
+  }
+
+  .inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .method-grid {
     grid-template-columns: 1fr;
   }
@@ -2250,6 +2475,26 @@ pre#receiptJson code {
     grid-column: 3;
     grid-row: 1 / 3;
     align-self: center;
+  }
+
+  .inventory-theme-head {
+    grid-template-columns: 1fr;
+    gap: 5px;
+    align-items: start;
+  }
+
+  .inventory-theme-no {
+    padding-top: 0;
+  }
+
+  .inventory-theme-head p {
+    grid-column: 1;
+    max-width: 52ch;
+    padding-top: 6px;
+  }
+
+  .inventory-card {
+    min-height: 0;
   }
 
   .method-quote {
@@ -2424,6 +2669,30 @@ pre#receiptJson code {
   .case-links .btn {
     min-height: 42px;
     padding-inline: 14px;
+  }
+
+  .inventory-meta div {
+    padding: 11px 12px;
+  }
+
+  .inventory-meta b {
+    font-size: 22px;
+  }
+
+  .inventory-meta span {
+    font-size: 7px;
+  }
+
+  .inventory-theme-head h3 {
+    font-size: 28px;
+  }
+
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-card {
+    padding: 16px 14px 14px;
   }
 
   .media-frame {

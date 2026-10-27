@@ -1,0 +1,99 @@
+{
+  "schema_version": 2,
+  "experiment": "open-loop synthetic requests; no agent-session dependencies",
+  "config": {
+    "requests": 300,
+    "seed": 2,
+    "rate": 8000,
+    "burst": 16000,
+    "service_rate": 8000,
+    "window_limit": 4,
+    "output": "receipts",
+    "plot": false
+  },
+  "environment": {
+    "python": "3.11.15",
+    "platform": "Linux-6.17.0-1011-oracle-aarch64-with-glibc2.39",
+    "numpy": "2.4.6",
+    "matplotlib": "3.11.2"
+  },
+  "simulator_wall_seconds": 0.028480157256126404,
+  "workload_sha256": "06ace0fc37fc48d71238cfb809b0ec47bc582e9aafb7eb1ea7c93d8113326b08",
+  "source_sha256": {
+    "gatekeeper/__init__.py": "055a70ac110e0db66db44eb4fd8b3d17ad25ede2ef0a5fbd475bd0f60faa25ac",
+    "gatekeeper/admission.py": "7061232f7a8508febf2a03787b6d060a8af04bf0df31ba5b6dc6ff39746a1571",
+    "gatekeeper/limits.py": "ca054bc3a54d2d169061c72a3206437aedc033168fb36fa9fcf98ef7490d5a83"
+  },
+  "invariants": {
+    "weighted_policy_records_identical": true,
+    "request_conservation": true,
+    "busy_le_elapsed": true
+  },
+  "results": {
+    "fixed_window": {
+      "policy": "fixed_window",
+      "admitted": 88,
+      "rejected": 212,
+      "charged_cost": 88.0,
+      "actual_tokens": 293075,
+      "busy_s": 36.634375,
+      "elapsed_s": 36.634375,
+      "finish_s": 36.64476389088032,
+      "mean_wait_s": 7.5141097850924,
+      "mean_response_s": 7.930409501001491,
+      "p95_response_s": 14.455981401024417,
+      "estimator_observations": 88,
+      "final_estimate": 837.7825138753786
+    },
+    "sliding_log": {
+      "policy": "sliding_log",
+      "admitted": 81,
+      "rejected": 219,
+      "charged_cost": 81.0,
+      "actual_tokens": 253737,
+      "busy_s": 31.717125,
+      "elapsed_s": 31.717125,
+      "finish_s": 31.727513890880317,
+      "mean_wait_s": 5.13783632072655,
+      "mean_response_s": 5.529405765170993,
+      "p95_response_s": 9.591459509921247,
+      "estimator_observations": 81,
+      "final_estimate": 1297.4703436724153
+    },
+    "token_bucket": {
+      "policy": "token_bucket",
+      "admitted": 90,
+      "rejected": 210,
+      "charged_cost": 187883.20536138283,
+      "actual_tokens": 202708,
+      "busy_s": 25.3385,
+      "elapsed_s": 25.3385,
+      "finish_s": 25.348888890880318,
+      "mean_wait_s": 2.8931623652566065,
+      "mean_response_s": 3.174701254145496,
+      "p95_response_s": 4.074091573385005,
+      "estimator_observations": 90,
+      "final_estimate": 594.2175310119517
+    },
+    "gcra": {
+      "policy": "gcra",
+      "admitted": 90,
+      "rejected": 210,
+      "charged_cost": 187883.20536138283,
+      "actual_tokens": 202708,
+      "busy_s": 25.3385,
+      "elapsed_s": 25.3385,
+      "finish_s": 25.348888890880318,
+      "mean_wait_s": 2.8931623652566065,
+      "mean_response_s": 3.174701254145496,
+      "p95_response_s": 4.074091573385005,
+      "estimator_observations": 90,
+      "final_estimate": 594.2175310119517
+    }
+  },
+  "metric_notes": {
+    "response": "completion minus arrival, not TTFT",
+    "charged_cost": "requests for count policies; estimated tokens otherwise",
+    "quantiles": "NumPy linear percentiles; admitted requests only"
+  }
+}

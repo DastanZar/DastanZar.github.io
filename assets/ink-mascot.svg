@@ -1,0 +1,166 @@
+<svg class="ink-svg" viewBox="0 0 240 268" role="img" aria-hidden="true" focusable="false">
+  <title>Ink, a tiny cat in a handmade octopus hood, holding a receipt satchel</title>
+
+  <g class="ink-ground">
+    <line x1="18" y1="249" x2="222" y2="249" stroke="currentColor" stroke-opacity=".24"/>
+    <line x1="18" y1="254" x2="62" y2="254" stroke="currentColor" stroke-opacity=".12" stroke-dasharray="2 5"/>
+    <line x1="178" y1="254" x2="222" y2="254" stroke="currentColor" stroke-opacity=".12" stroke-dasharray="2 5"/>
+    <ellipse class="ink-shadow" cx="120" cy="247" rx="51" ry="6" fill="currentColor" opacity=".13"/>
+  </g>
+
+  <g class="ink-orbit" aria-hidden="true">
+    <ellipse cx="120" cy="145" rx="99" ry="105" fill="none" stroke="#e9491b" stroke-width="1.2" stroke-dasharray="2 7" opacity="0"/>
+  </g>
+
+  <g class="ink-character">
+    <g class="ink-tail">
+      <path d="M72 207 C47 220 27 211 29 194 C31 180 45 175 53 183 C61 191 55 201 47 198" fill="none" stroke="#141511" stroke-width="16" stroke-linecap="round"/>
+      <path d="M72 207 C47 220 27 211 29 194 C31 180 45 175 53 183 C61 191 55 201 47 198" fill="none" stroke="#f2efe5" stroke-width="12" stroke-linecap="round"/>
+      <path d="M49 198 C45 197 42 194 41 190" fill="none" stroke="#e9491b" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g class="ink-body">
+      <path d="M76 151 C63 166 59 190 65 210 C71 231 92 241 120 241 C148 241 170 230 176 209 C181 189 176 166 162 151 Z" fill="#f2efe5" stroke="#141511" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M88 187 C84 205 91 225 109 233 C117 236 132 235 142 229" fill="none" stroke="#141511" stroke-opacity=".10" stroke-width="1.4"/>
+      <ellipse cx="120" cy="214" rx="24" ry="16" fill="#f8f4e9" opacity=".8"/>
+    </g>
+
+    <g class="ink-tentacles">
+      <path class="ink-tentacle t1" d="M78 104 C51 90 25 102 22 124 C20 141 35 150 45 141" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="42" cy="142" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t2" d="M70 129 C42 123 22 140 27 159 C31 174 48 178 55 166" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="53" cy="168" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t3" d="M77 155 C57 157 43 172 48 188 C52 201 67 203 73 192" fill="none" stroke="#10150e" stroke-width="13" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="71" cy="193" r="2.2" fill="#e9491b"/>
+
+      <path class="ink-tentacle t4" d="M162 104 C189 90 215 102 218 124 C220 141 205 150 195 141" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="198" cy="142" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t5" d="M170 129 C198 123 218 140 213 159 C209 174 192 178 185 166" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="188" cy="168" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t6" d="M163 155 C183 157 197 172 192 188 C188 201 173 203 167 192" fill="none" stroke="#10150e" stroke-width="13" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="169" cy="193" r="2.2" fill="#e9491b"/>
+    </g>
+
+    <g class="ink-ears">
+      <path d="M89 62 L80 29 C78 23 84 20 88 24 L108 45 Z" fill="#f2efe5" stroke="#141511" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M90 52 L85 34 L99 46 Z" fill="#e9491b" opacity=".28"/>
+      <path d="M151 62 L160 29 C162 23 156 20 152 24 L132 45 Z" fill="#f2efe5" stroke="#141511" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M150 52 L155 34 L141 46 Z" fill="#e9491b" opacity=".28"/>
+    </g>
+
+    <path class="ink-hood" d="M66 108 C64 71 87 44 120 44 C153 44 176 71 174 108 L173 151 C173 164 160 172 147 167 C138 163 132 158 120 158 C108 158 102 163 93 167 C80 172 67 164 67 151 Z" fill="#10150e" stroke="#141511" stroke-width="2.8" stroke-linejoin="round"/>
+
+    <g class="ink-hood-details">
+      <path d="M87 55 C99 45 108 42 120 42 C132 42 141 45 153 55" fill="none" stroke="#efeadd" stroke-opacity=".24" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <path d="M77 158 C92 166 148 166 163 158" fill="none" stroke="#efeadd" stroke-opacity=".16" stroke-width="1" stroke-dasharray="2 4"/>
+      <rect x="154" y="79" width="22" height="18" rx="2" fill="#efeadd" stroke="#141511" stroke-width="1.4" transform="rotate(8 165 88)"/>
+      <text x="165" y="90" fill="#141511" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle" transform="rotate(8 165 88)">INK</text>
+      <path d="M147 72 l4 -4 M151 76 l4 -4" stroke="#efeadd" stroke-opacity=".38" stroke-width=".8"/>
+    </g>
+
+    <g class="ink-head">
+      <ellipse cx="120" cy="110" rx="44" ry="38" fill="#f7f1e3" stroke="#141511" stroke-width="2.5"/>
+      <ellipse cx="120" cy="110" rx="44" ry="38" fill="none" stroke="#efeadd" stroke-opacity=".28" stroke-width="1"/>
+
+      <g class="ink-eyes">
+        <g class="ink-gaze">
+          <ellipse cx="104" cy="109" rx="8.2" ry="10.5" fill="#141511"/>
+          <ellipse cx="136" cy="109" rx="8.2" ry="10.5" fill="#141511"/>
+          <circle cx="101.5" cy="105.5" r="2.4" fill="#f2efe5"/>
+          <circle cx="133.5" cy="105.5" r="2.4" fill="#f2efe5"/>
+          <circle cx="106.5" cy="113" r="1.1" fill="#f2efe5" opacity=".8"/>
+          <circle cx="138.5" cy="113" r="1.1" fill="#f2efe5" opacity=".8"/>
+        </g>
+      </g>
+
+      <g class="ink-happy-arcs" aria-hidden="true">
+        <path d="M96 111 Q104 100 112 111" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M128 111 Q136 100 144 111" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+      </g>
+
+      <ellipse cx="88" cy="125" rx="7" ry="3.6" fill="#e9491b" opacity=".22"/>
+      <ellipse cx="152" cy="125" rx="7" ry="3.6" fill="#e9491b" opacity=".22"/>
+
+      <path d="M116 122 L124 122 L120 126 Z" fill="#e9491b"/>
+      <path d="M114 130 Q120 135 126 130" fill="none" stroke="#141511" stroke-width="1.8" stroke-linecap="round"/>
+      <ellipse cx="120" cy="133.5" rx="2.6" ry="1.5" fill="#e9491b" opacity=".7"/>
+
+      <g class="ink-whiskers" stroke="#141511" stroke-opacity=".42" stroke-width=".8" stroke-linecap="round">
+        <path d="M92 123 L78 119 M92 127 L77 128"/>
+        <path d="M148 123 L162 119 M148 127 L163 128"/>
+      </g>
+
+      <g class="ink-glint" aria-hidden="true">
+        <path d="M73 88 l2 -5 2 5 5 2 -5 2 -2 5 -2 -5 -5 -2z" fill="#e9491b" opacity=".9"/>
+        <path d="M162 57 l1.5 -4 1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5z" fill="#e9491b" opacity=".55"/>
+      </g>
+    </g>
+
+    <g class="ink-scarf">
+      <path d="M83 149 C96 157 144 157 157 149 L159 163 C146 171 96 171 81 163 Z" fill="#e9491b" stroke="#141511" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M85 154 C98 160 143 160 156 154" fill="none" stroke="#f2efe5" stroke-opacity=".36" stroke-width="1"/>
+      <g class="ink-scarf-tail">
+        <path d="M151 160 C171 163 186 174 184 189 C183 198 174 204 167 199 C160 194 162 184 152 180" fill="#e9491b" stroke="#141511" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M168 183 C172 188 171 194 168 198" fill="none" stroke="#f2efe5" stroke-opacity=".4" stroke-width="1"/>
+      </g>
+      <g class="ink-tag">
+        <path d="M96 158 L96 172" stroke="#141511" stroke-width=".8"/>
+        <rect x="87" y="170" width="25" height="12" rx="2" fill="#efeadd" stroke="#141511" stroke-width="1.2"/>
+        <text x="99.5" y="178.5" fill="#141511" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">INK</text>
+      </g>
+    </g>
+
+    <g class="ink-satchel">
+      <path d="M156 160 L92 200" fill="none" stroke="#141511" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M156 160 L92 200" fill="none" stroke="#e9491b" stroke-width="1.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".8"/>
+      <path d="M78 195 C72 196 69 201 70 208 L72 225 C73 233 78 236 86 236 L112 236 C120 236 124 232 125 225 L126 207 C126 199 121 195 114 195 Z" fill="#10150e" stroke="#141511" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M75 202 L122 202 L123 211 L74 211 Z" fill="#e9491b" opacity=".9"/>
+      <text x="88" y="225" fill="#efeadd" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="1">&gt;_</text>
+      <path d="M104 203 L106 226" stroke="#efeadd" stroke-opacity=".16" stroke-width="1" stroke-dasharray="2 3"/>
+      <g class="ink-receipt">
+        <path d="M120 198 L142 191 L147 209 L125 216 Z" fill="#efeadd" stroke="#141511" stroke-width="1.2"/>
+        <path d="M126 202 L139 198 M127 206 L140 202 M128 210 L141 206" stroke="#141511" stroke-opacity=".34" stroke-width=".8"/>
+        <text x="132" y="214" fill="#e9491b" font-family="JetBrains Mono, monospace" font-size="4.6" transform="rotate(-18 132 214)">5.69</text>
+      </g>
+    </g>
+
+    <g class="ink-pointer ink-pointer-left" aria-hidden="true">
+      <path d="M73 192 C55 184 38 174 20 162" fill="none" stroke="#f7f1e3" stroke-width="13" stroke-linecap="round"/>
+      <path d="M73 192 C55 184 38 174 20 162" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M29 168 L12 158 L30 151 Z" fill="#e9491b" stroke="#141511" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M57 183 l4 4 M44 175 l4 4 M32 167 l4 4" stroke="#141511" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>
+    </g>
+
+    <g class="ink-pointer ink-pointer-right" aria-hidden="true">
+      <path d="M167 192 C185 184 202 174 220 162" fill="none" stroke="#f7f1e3" stroke-width="13" stroke-linecap="round"/>
+      <path d="M167 192 C185 184 202 174 220 162" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M211 168 L228 158 L210 151 Z" fill="#e9491b" stroke="#141511" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M183 183 l-4 4 M196 175 l-4 4 M208 167 l-4 4" stroke="#141511" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>
+    </g>
+
+    <g class="ink-paws">
+      <ellipse cx="89" cy="236" rx="13" ry="7" fill="#f7f1e3" stroke="#141511" stroke-width="2"/>
+      <path d="M84 235 l0 3 M89 234 l0 4 M94 235 l0 3" stroke="#141511" stroke-opacity=".26" stroke-width=".8" stroke-linecap="round"/>
+      <g class="ink-paw-right">
+        <ellipse cx="151" cy="236" rx="13" ry="7" fill="#f7f1e3" stroke="#141511" stroke-width="2"/>
+        <path d="M146 235 l0 3 M151 234 l0 4 M156 235 l0 3" stroke="#141511" stroke-opacity=".26" stroke-width=".8" stroke-linecap="round"/>
+      </g>
+    </g>
+
+    <g transform="translate(0 -15)">
+      <g class="ink-stamp-prop" transform="rotate(-8 184 233)">
+        <rect x="172" y="229" width="24" height="11" rx="2" fill="#e9491b" stroke="#141511" stroke-width="1.5"/>
+        <rect x="176" y="222" width="16" height="8" rx="2" fill="#f2efe5" stroke="#141511" stroke-width="1.2"/>
+        <path d="M181 225 L187 225 M181 227 L189 227" stroke="#141511" stroke-opacity=".42" stroke-width=".8"/>
+      </g>
+    </g>
+  </g>
+
+  <g class="ink-fx" aria-hidden="true">
+    <path class="fx fx1" d="M57 70 l3 -7 3 7 7 3 -7 3 -3 7 -3 -7 -7 -3z" fill="#e9491b"/>
+    <path class="fx fx2" d="M184 98 l2 -5 2 5 5 2 -5 2 -2 5 -2 -5 -5 -2z" fill="#e9491b"/>
+    <path class="fx fx3" d="M42 124 l1.5 -4 1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5z" fill="#e9491b"/>
+    <path class="fx fx4" d="M193 139 l1.5 -4 1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5z" fill="#e9491b"/>
+  </g>
+
+</svg>

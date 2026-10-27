@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#F2EFE5">
 <link rel="canonical" href="https://dastanzar.github.io/">
 <meta property="og:title" content="Abhinav Chauhan — MLSys &amp; Inference Systems">
-<meta property="og:description" content="I make inference cheaper — and I show the receipts. Ten measured systems, one committed receipt each.">
+<meta property="og:description" content="I make inference cheaper — and I show the receipts. Ten measured case files and a 20-card index from a twenty-repo public inventory.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Abhinav Chauhan">
 <meta property="og:url" content="https://dastanzar.github.io/">
@@ -20,7 +20,7 @@
 <meta property="og:image:alt" content="Abhinav Chauhan — I make inference cheaper. And I show the receipts.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Abhinav Chauhan — MLSys &amp; Inference Systems">
-<meta name="twitter:description" content="I make inference cheaper — and I show the receipts.">
+<meta name="twitter:description" content="Ten measured case files and a 20-card index from a twenty-repo public inventory.">
 <meta name="twitter:image" content="https://dastanzar.github.io/og.png">
 <meta name="twitter:image:alt" content="Abhinav Chauhan — I make inference cheaper. And I show the receipts.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -28,10 +28,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="motion.css">
 <script>document.documentElement.classList.add('js');</script>
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body>
+<svg class="ink-defs" aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute">
+  <symbol id="ink-tab-mark" viewBox="0 0 120 120">
+    <path d="M36 52 C18 44 8 55 14 68 C19 78 31 78 34 69" fill="none" stroke="#10150e" stroke-width="9" stroke-linecap="round"/>
+    <path d="M84 52 C102 44 112 55 106 68 C101 78 89 78 86 69" fill="none" stroke="#10150e" stroke-width="9" stroke-linecap="round"/>
+    <path d="M45 31 L39 11 C38 7 42 5 45 9 L57 24 Z" fill="#f2efe5" stroke="#141511" stroke-width="2"/>
+    <path d="M75 31 L81 11 C82 7 78 5 75 9 L63 24 Z" fill="#f2efe5" stroke="#141511" stroke-width="2"/>
+    <path d="M30 54 C29 31 44 17 60 17 C76 17 91 31 90 54 L90 75 C90 83 83 87 76 84 C72 82 68 79 60 79 C52 79 48 82 44 84 C37 87 30 83 30 75 Z" fill="#10150e" stroke="#141511" stroke-width="2.2"/>
+    <ellipse cx="60" cy="55" rx="24" ry="21" fill="#f7f1e3" stroke="#141511" stroke-width="1.8"/>
+    <ellipse cx="52" cy="54" rx="4" ry="5.5" fill="#141511"/>
+    <ellipse cx="68" cy="54" rx="4" ry="5.5" fill="#141511"/>
+    <circle cx="50.5" cy="52" r="1.3" fill="#f2efe5"/>
+    <circle cx="66.5" cy="52" r="1.3" fill="#f2efe5"/>
+    <path d="M57 62 Q60 65 63 62" fill="none" stroke="#141511" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M42 76 C50 81 70 81 78 76 L79 84 C70 89 50 89 41 84 Z" fill="#e9491b" stroke="#141511" stroke-width="1.6"/>
+    <path d="M73 81 C84 82 88 89 85 94 C83 98 78 98 77 94 C76 90 72 87 68 86" fill="#e9491b" stroke="#141511" stroke-width="1.6"/>
+  </symbol>
+</svg>
 <a class="skip" href="#main">Skip to content</a>
 <div class="progress" aria-hidden="true"><i></i></div>
 
@@ -43,9 +61,10 @@
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a href="#work"><span>01</span>Work</a>
-      <a href="#receipts"><span>02</span>Receipts</a>
-      <a href="#method"><span>03</span>Method</a>
-      <a href="#about"><span>04</span>About</a>
+      <a href="#inventory"><span>02</span>Inventory</a>
+      <a href="#receipts"><span>03</span>Receipts</a>
+      <a href="#method"><span>04</span>Method</a>
+      <a href="#about"><span>05</span>About</a>
     </nav>
     <div class="mast-right">
       <span class="status"><i aria-hidden="true"></i>Open to MLSys roles</span>
@@ -67,38 +86,219 @@
             <span class="h1-tail">And I show the receipts.</span>
           </h1>
           <div class="hero-bottom">
-            <p class="lede">I build and measure the systems layer of ML: <strong>quantization, KV memory, batch scheduling, and speculative decoding.</strong> Ten standalone repos. Real CPU receipts. GPU figures are labelled models, never borrowed numbers.</p>
+            <p class="lede">I build and measure the systems layer of ML: <strong>quantization, KV memory, batch scheduling, and speculative decoding.</strong> Ten case files from a twenty-repo public inventory. Real CPU receipts. GPU figures are labelled models, never borrowed numbers.</p>
             <div class="hero-actions">
               <a class="btn btn-ink" href="#work">Selected systems <span aria-hidden="true">↓</span></a>
               <a class="btn btn-ghost" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </div>
-        <aside class="hero-aside" aria-label="Portfolio facts">
-          <div class="stamp" aria-hidden="true">
+        <aside class="hero-aside" aria-label="Portfolio facts and mascot">
+          <div class="ink-stage" data-ink-stage>
+            <div class="ink-stage-head"><span>INK / RECEIPT AUDITOR</span><span>OCTO-CAT COSPLAY</span></div>
+            <p class="ink-bubble" data-ink-bubble role="status" aria-live="polite">I count the calls.</p>
+            <button class="ink-figure" type="button" data-ink-figure aria-label="Pet Ink, the receipt auditor">
+              <svg class="ink-svg" viewBox="0 0 240 268" role="img" aria-hidden="true" focusable="false">
+  <title>Ink, a tiny cat in a handmade octopus hood, holding a receipt satchel</title>
+
+  <g class="ink-ground">
+    <line x1="18" y1="249" x2="222" y2="249" stroke="currentColor" stroke-opacity=".24"/>
+    <line x1="18" y1="254" x2="62" y2="254" stroke="currentColor" stroke-opacity=".12" stroke-dasharray="2 5"/>
+    <line x1="178" y1="254" x2="222" y2="254" stroke="currentColor" stroke-opacity=".12" stroke-dasharray="2 5"/>
+    <ellipse class="ink-shadow" cx="120" cy="247" rx="51" ry="6" fill="currentColor" opacity=".13"/>
+  </g>
+
+  <g class="ink-orbit" aria-hidden="true">
+    <ellipse cx="120" cy="145" rx="99" ry="105" fill="none" stroke="#e9491b" stroke-width="1.2" stroke-dasharray="2 7" opacity="0"/>
+  </g>
+
+  <g class="ink-character">
+    <g class="ink-tail">
+      <path d="M72 207 C47 220 27 211 29 194 C31 180 45 175 53 183 C61 191 55 201 47 198" fill="none" stroke="#141511" stroke-width="16" stroke-linecap="round"/>
+      <path d="M72 207 C47 220 27 211 29 194 C31 180 45 175 53 183 C61 191 55 201 47 198" fill="none" stroke="#f2efe5" stroke-width="12" stroke-linecap="round"/>
+      <path d="M49 198 C45 197 42 194 41 190" fill="none" stroke="#e9491b" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g class="ink-body">
+      <path d="M76 151 C63 166 59 190 65 210 C71 231 92 241 120 241 C148 241 170 230 176 209 C181 189 176 166 162 151 Z" fill="#f2efe5" stroke="#141511" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M88 187 C84 205 91 225 109 233 C117 236 132 235 142 229" fill="none" stroke="#141511" stroke-opacity=".10" stroke-width="1.4"/>
+      <ellipse cx="120" cy="214" rx="24" ry="16" fill="#f8f4e9" opacity=".8"/>
+    </g>
+
+    <g class="ink-tentacles">
+      <path class="ink-tentacle t1" d="M78 104 C51 90 25 102 22 124 C20 141 35 150 45 141" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="42" cy="142" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t2" d="M70 129 C42 123 22 140 27 159 C31 174 48 178 55 166" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="53" cy="168" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t3" d="M77 155 C57 157 43 172 48 188 C52 201 67 203 73 192" fill="none" stroke="#10150e" stroke-width="13" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="71" cy="193" r="2.2" fill="#e9491b"/>
+
+      <path class="ink-tentacle t4" d="M162 104 C189 90 215 102 218 124 C220 141 205 150 195 141" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="198" cy="142" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t5" d="M170 129 C198 123 218 140 213 159 C209 174 192 178 185 166" fill="none" stroke="#10150e" stroke-width="14" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="188" cy="168" r="2.4" fill="#e9491b"/>
+      <path class="ink-tentacle t6" d="M163 155 C183 157 197 172 192 188 C188 201 173 203 167 192" fill="none" stroke="#10150e" stroke-width="13" stroke-linecap="round"/>
+      <circle class="ink-sucker" cx="169" cy="193" r="2.2" fill="#e9491b"/>
+    </g>
+
+    <g class="ink-ears">
+      <path d="M89 62 L80 29 C78 23 84 20 88 24 L108 45 Z" fill="#f2efe5" stroke="#141511" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M90 52 L85 34 L99 46 Z" fill="#e9491b" opacity=".28"/>
+      <path d="M151 62 L160 29 C162 23 156 20 152 24 L132 45 Z" fill="#f2efe5" stroke="#141511" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M150 52 L155 34 L141 46 Z" fill="#e9491b" opacity=".28"/>
+    </g>
+
+    <path class="ink-hood" d="M66 108 C64 71 87 44 120 44 C153 44 176 71 174 108 L173 151 C173 164 160 172 147 167 C138 163 132 158 120 158 C108 158 102 163 93 167 C80 172 67 164 67 151 Z" fill="#10150e" stroke="#141511" stroke-width="2.8" stroke-linejoin="round"/>
+
+    <g class="ink-hood-details">
+      <path d="M87 55 C99 45 108 42 120 42 C132 42 141 45 153 55" fill="none" stroke="#efeadd" stroke-opacity=".24" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <path d="M77 158 C92 166 148 166 163 158" fill="none" stroke="#efeadd" stroke-opacity=".16" stroke-width="1" stroke-dasharray="2 4"/>
+      <rect x="154" y="79" width="22" height="18" rx="2" fill="#efeadd" stroke="#141511" stroke-width="1.4" transform="rotate(8 165 88)"/>
+      <text x="165" y="90" fill="#141511" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle" transform="rotate(8 165 88)">INK</text>
+      <path d="M147 72 l4 -4 M151 76 l4 -4" stroke="#efeadd" stroke-opacity=".38" stroke-width=".8"/>
+    </g>
+
+    <g class="ink-head">
+      <ellipse cx="120" cy="110" rx="44" ry="38" fill="#f7f1e3" stroke="#141511" stroke-width="2.5"/>
+      <ellipse cx="120" cy="110" rx="44" ry="38" fill="none" stroke="#efeadd" stroke-opacity=".28" stroke-width="1"/>
+
+      <g class="ink-eyes">
+        <g class="ink-gaze">
+          <ellipse cx="104" cy="109" rx="8.2" ry="10.5" fill="#141511"/>
+          <ellipse cx="136" cy="109" rx="8.2" ry="10.5" fill="#141511"/>
+          <circle cx="101.5" cy="105.5" r="2.4" fill="#f2efe5"/>
+          <circle cx="133.5" cy="105.5" r="2.4" fill="#f2efe5"/>
+          <circle cx="106.5" cy="113" r="1.1" fill="#f2efe5" opacity=".8"/>
+          <circle cx="138.5" cy="113" r="1.1" fill="#f2efe5" opacity=".8"/>
+        </g>
+      </g>
+
+      <g class="ink-happy-arcs" aria-hidden="true">
+        <path d="M96 111 Q104 100 112 111" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M128 111 Q136 100 144 111" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+      </g>
+
+      <ellipse cx="88" cy="125" rx="7" ry="3.6" fill="#e9491b" opacity=".22"/>
+      <ellipse cx="152" cy="125" rx="7" ry="3.6" fill="#e9491b" opacity=".22"/>
+
+      <path d="M116 122 L124 122 L120 126 Z" fill="#e9491b"/>
+      <path d="M114 130 Q120 135 126 130" fill="none" stroke="#141511" stroke-width="1.8" stroke-linecap="round"/>
+      <ellipse cx="120" cy="133.5" rx="2.6" ry="1.5" fill="#e9491b" opacity=".7"/>
+
+      <g class="ink-whiskers" stroke="#141511" stroke-opacity=".42" stroke-width=".8" stroke-linecap="round">
+        <path d="M92 123 L78 119 M92 127 L77 128"/>
+        <path d="M148 123 L162 119 M148 127 L163 128"/>
+      </g>
+
+      <g class="ink-glint" aria-hidden="true">
+        <path d="M73 88 l2 -5 2 5 5 2 -5 2 -2 5 -2 -5 -5 -2z" fill="#e9491b" opacity=".9"/>
+        <path d="M162 57 l1.5 -4 1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5z" fill="#e9491b" opacity=".55"/>
+      </g>
+    </g>
+
+    <g class="ink-scarf">
+      <path d="M83 149 C96 157 144 157 157 149 L159 163 C146 171 96 171 81 163 Z" fill="#e9491b" stroke="#141511" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M85 154 C98 160 143 160 156 154" fill="none" stroke="#f2efe5" stroke-opacity=".36" stroke-width="1"/>
+      <g class="ink-scarf-tail">
+        <path d="M151 160 C171 163 186 174 184 189 C183 198 174 204 167 199 C160 194 162 184 152 180" fill="#e9491b" stroke="#141511" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M168 183 C172 188 171 194 168 198" fill="none" stroke="#f2efe5" stroke-opacity=".4" stroke-width="1"/>
+      </g>
+      <g class="ink-tag">
+        <path d="M96 158 L96 172" stroke="#141511" stroke-width=".8"/>
+        <rect x="87" y="170" width="25" height="12" rx="2" fill="#efeadd" stroke="#141511" stroke-width="1.2"/>
+        <text x="99.5" y="178.5" fill="#141511" font-family="JetBrains Mono, monospace" font-size="5.5" text-anchor="middle">INK</text>
+      </g>
+    </g>
+
+    <g class="ink-satchel">
+      <path d="M156 160 L92 200" fill="none" stroke="#141511" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M156 160 L92 200" fill="none" stroke="#e9491b" stroke-width="1.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".8"/>
+      <path d="M78 195 C72 196 69 201 70 208 L72 225 C73 233 78 236 86 236 L112 236 C120 236 124 232 125 225 L126 207 C126 199 121 195 114 195 Z" fill="#10150e" stroke="#141511" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M75 202 L122 202 L123 211 L74 211 Z" fill="#e9491b" opacity=".9"/>
+      <text x="88" y="225" fill="#efeadd" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="1">&gt;_</text>
+      <path d="M104 203 L106 226" stroke="#efeadd" stroke-opacity=".16" stroke-width="1" stroke-dasharray="2 3"/>
+      <g class="ink-receipt">
+        <path d="M120 198 L142 191 L147 209 L125 216 Z" fill="#efeadd" stroke="#141511" stroke-width="1.2"/>
+        <path d="M126 202 L139 198 M127 206 L140 202 M128 210 L141 206" stroke="#141511" stroke-opacity=".34" stroke-width=".8"/>
+        <text x="132" y="214" fill="#e9491b" font-family="JetBrains Mono, monospace" font-size="4.6" transform="rotate(-18 132 214)">5.69</text>
+      </g>
+    </g>
+
+    <g class="ink-pointer ink-pointer-left" aria-hidden="true">
+      <path d="M73 192 C55 184 38 174 20 162" fill="none" stroke="#f7f1e3" stroke-width="13" stroke-linecap="round"/>
+      <path d="M73 192 C55 184 38 174 20 162" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M29 168 L12 158 L30 151 Z" fill="#e9491b" stroke="#141511" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M57 183 l4 4 M44 175 l4 4 M32 167 l4 4" stroke="#141511" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>
+    </g>
+
+    <g class="ink-pointer ink-pointer-right" aria-hidden="true">
+      <path d="M167 192 C185 184 202 174 220 162" fill="none" stroke="#f7f1e3" stroke-width="13" stroke-linecap="round"/>
+      <path d="M167 192 C185 184 202 174 220 162" fill="none" stroke="#141511" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M211 168 L228 158 L210 151 Z" fill="#e9491b" stroke="#141511" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M183 183 l-4 4 M196 175 l-4 4 M208 167 l-4 4" stroke="#141511" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>
+    </g>
+
+    <g class="ink-paws">
+      <ellipse cx="89" cy="236" rx="13" ry="7" fill="#f7f1e3" stroke="#141511" stroke-width="2"/>
+      <path d="M84 235 l0 3 M89 234 l0 4 M94 235 l0 3" stroke="#141511" stroke-opacity=".26" stroke-width=".8" stroke-linecap="round"/>
+      <g class="ink-paw-right">
+        <ellipse cx="151" cy="236" rx="13" ry="7" fill="#f7f1e3" stroke="#141511" stroke-width="2"/>
+        <path d="M146 235 l0 3 M151 234 l0 4 M156 235 l0 3" stroke="#141511" stroke-opacity=".26" stroke-width=".8" stroke-linecap="round"/>
+      </g>
+    </g>
+
+    <g transform="translate(0 -15)">
+      <g class="ink-stamp-prop" transform="rotate(-8 184 233)">
+        <rect x="172" y="229" width="24" height="11" rx="2" fill="#e9491b" stroke="#141511" stroke-width="1.5"/>
+        <rect x="176" y="222" width="16" height="8" rx="2" fill="#f2efe5" stroke="#141511" stroke-width="1.2"/>
+        <path d="M181 225 L187 225 M181 227 L189 227" stroke="#141511" stroke-opacity=".42" stroke-width=".8"/>
+      </g>
+    </g>
+  </g>
+
+  <g class="ink-fx" aria-hidden="true">
+    <path class="fx fx1" d="M57 70 l3 -7 3 7 7 3 -7 3 -3 7 -3 -7 -7 -3z" fill="#e9491b"/>
+    <path class="fx fx2" d="M184 98 l2 -5 2 5 5 2 -5 2 -2 5 -2 -5 -5 -2z" fill="#e9491b"/>
+    <path class="fx fx3" d="M42 124 l1.5 -4 1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5z" fill="#e9491b"/>
+    <path class="fx fx4" d="M193 139 l1.5 -4 1.5 4 4 1.5 -4 1.5 -1.5 4 -1.5 -4 -4 -1.5z" fill="#e9491b"/>
+  </g>
+
+</svg>
+
+            </button>
+            <div class="ink-seal" aria-hidden="true"><span>AUDITED</span><span>RECEIPT ATTACHED</span></div>
+            <div class="ink-tricks" role="group" aria-label="Ink's tricks">
+              <button type="button" data-ink-trick="hop"><span>01</span>Hop</button>
+              <button type="button" data-ink-trick="swirl"><span>02</span>Swirl</button>
+              <button type="button" data-ink-trick="point"><span>03</span>Point</button>
+              <button type="button" data-ink-trick="stamp"><span>04</span>Stamp</button>
+            </div>
+            <div class="ink-stage-foot"><span>Tap a trick / pet Ink</span></div>
+          </div>
+          <div class="stamp aside-stamp" aria-hidden="true">
             <span>MEASURED</span>
             <span>NOT</span>
             <span>MODELED*</span>
             <small>*unless labeled</small>
           </div>
-          <ul class="aside-facts"><li><span>SYSTEMS</span><strong>10 shipped</strong></li><li><span>MEASURED ON</span><strong>CPU / HF models</strong></li><li><span>GPU CLAIMS</span><strong>0 unlabeled</strong></li><li><span>RECEIPTS</span><strong>10 committed</strong></li></ul>
+          <ul class="aside-facts"><li><span>CASE FILES</span><strong>10 on this page</strong></li><li><span>INVENTORY</span><strong>20 public repos</strong></li><li><span>GPU CLAIMS</span><strong>0 unlabeled</strong></li><li><span>RECEIPTS</span><strong>20 linked</strong></li></ul>
           <div class="scroll-cue" aria-hidden="true"><span>SCROLL</span><span class="scroll-line"></span></div>
         </aside>
       </div>
-      <div class="proof"><div class="proof-item">
-        <span class="proof-num">2.52×</span>
+      <div class="proof"><div class="proof-item" data-ink-point data-ink-say="5.69 tokens per target call. checked.">
+        <span class="proof-num" data-count="5.69" data-decimals="2" data-suffix="×" aria-label="5.69×">5.69×</span>
         <span class="proof-label">tokens per target call</span>
         <a class="proof-src" href="#sdecode">sdecode <span aria-hidden="true">↗</span></a>
-      </div><div class="proof-item">
-        <span class="proof-num">59.5%</span>
+      </div><div class="proof-item" data-ink-point data-ink-say="59.5% fewer blocks. I counted them twice.">
+        <span class="proof-num" data-count="59.5" data-decimals="1" data-suffix="%" aria-label="59.5%">59.5%</span>
         <span class="proof-label">fewer KV blocks</span>
         <a class="proof-src" href="#pagemem">pagemem <span aria-hidden="true">↗</span></a>
-      </div><div class="proof-item">
-        <span class="proof-num">94%</span>
+      </div><div class="proof-item" data-ink-point data-ink-say="94 percent lower TTFT. p99 is in the receipt too.">
+        <span class="proof-num" data-count="94" data-decimals="0" data-suffix="%" aria-label="94%">94%</span>
         <span class="proof-label">lower TTFT</span>
         <a class="proof-src" href="#cplan">cplan <span aria-hidden="true">↗</span></a>
-      </div><div class="proof-item">
-        <span class="proof-num">3.98×</span>
+      </div><div class="proof-item" data-ink-point data-ink-say="3.98 times. the codebook did the work.">
+        <span class="proof-num" data-count="3.98" data-decimals="2" data-suffix="×" aria-label="3.98×">3.98×</span>
         <span class="proof-label">weight compression</span>
         <a class="proof-src" href="#shipping">bithash <span aria-hidden="true">↗</span></a>
       </div></div>
@@ -110,27 +310,27 @@
     <div class="wrap">
       <div class="section-head reveal">
         <div class="section-index">01 / WORK</div>
-        <h2 class="section-title">Selected <em>systems</em></h2>
-        <p class="section-note">Three case files and seven more systems. Every claim links back to the repo and the receipt that proves it.</p>
+        <h2 class="section-title" data-split>Selected <em>systems</em></h2>
+        <p class="section-note">Ten case files from the public inventory. Every claim links back to the repo and the receipt that proves it.</p>
       </div>
-      <article class="case case-featured reveal" id="sdecode">
+      <article class="case case-featured reveal" id="sdecode" data-ink-point data-ink-say="sdecode. the target-call ledger.">
   <div class="case-copy">
     <div class="case-meta"><span class="case-no">01</span><span>Speculative decoding</span><span>2026</span></div>
     <h3>sdecode</h3>
-    <p class="case-claim"><strong>2.52×</strong> tokens per target call<span class="case-period">.</span></p>
+    <p class="case-claim"><strong>5.69×</strong> tokens per target call<span class="case-period">.</span></p>
     <p class="case-desc">A measured draft/verify harness for real models: a smaller drafter proposes, the target verifies a batch, and every lane is checked token-for-token against the naive target. The receipt keeps the wins and the losses.</p>
     <dl class="specs">
       <div class="spec"><dt>TARGET / DRAFTER</dt><dd>gpt2 / distilgpt2</dd></div>
-      <div class="spec"><dt>DRAFTER COST c</dt><dd>0.61</dd></div>
+      <div class="spec"><dt>DRAFTER COST c</dt><dd>0.63</dd></div>
       <div class="spec"><dt>BEST LANE</dt><dd>fixed K=8</dd></div>
-      <div class="spec"><dt>TOKENS / CALL</dt><dd>2.52×</dd></div>
+      <div class="spec"><dt>TOKENS / CALL</dt><dd>5.69×</dd></div>
       <div class="spec"><dt>IDENTITY</dt><dd>100% token match</dd></div>
       <div class="spec"><dt>ARTIFACTS</dt><dd>app · film · ledger</dd></div>
     </dl>
-    <p class="case-note"><span class="note-mark"></span> Negative result included: adaptive K averaged 1.17× on this pair; both lanes stay in the receipt.</p>
+    <p class="case-note"><span class="note-mark"></span> Negative result included: adaptive K averaged 4.16× on this pair; both lanes stay in the receipt.</p>
     <div class="case-links">
       <a class="btn btn-ink" href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
-      <a class="btn btn-ghost" href="app/sdecode/session.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
+      <a class="btn btn-ghost" href="app/sdecode/index.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
       <a class="text-link" href="https://github.com/DastanZar/sdecode/blob/main/receipts/real_run.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
     </div>
   </div>
@@ -138,16 +338,16 @@
     <figure class="media-frame">
       <div class="media-top"><span class="media-dots"><i></i><i></i><i></i></span><span>sdecode / recorded run</span><span class="media-live">APP</span></div>
       <img src="assets/sdecode-app.png" alt="sdecode session app showing a recorded run, lane selector, and generated text" loading="eager" width="1440" height="760">
-      <figcaption class="media-bar"><span>APP / session.html</span><span>measured on CPU</span></figcaption>
+      <figcaption class="media-bar"><span>APP / target-call budget</span><span>measured on CPU</span></figcaption>
     </figure>
     <div class="receipt-strip">
-      <div><span>TOKENS / CALL</span><strong>2.52×</strong></div>
-      <div><span>TARGET CALLS</span><strong>7.3 avg</strong></div>
+      <div><span>TOKENS / CALL</span><strong>5.69×</strong></div>
+      <div><span>TARGET CALLS</span><strong>10.7 avg</strong></div>
       <div><span>MATCH</span><strong>100%</strong></div>
     </div>
   </div>
 </article>
-      <div class="case-duo"><article class="case-mini reveal" id="pagemem">
+      <div class="case-duo"><article class="case-mini reveal" id="pagemem" data-ink-point data-ink-say="pagemem. the receipt is in the repo.">
   <div class="case-meta"><span class="case-no">02</span><span>KV memory</span><span>2026</span></div>
   <h3>pagemem</h3>
   <div class="mini-viz">
@@ -166,7 +366,7 @@
   <text x="20" y="43" class="svg-label">PREALLOCATED <tspan class="svg-ink">/ 504</tspan></text>
   <rect x="20" y="50" width="480" height="48" fill="url(#pm-base)" stroke="#141511" stroke-opacity=".18"/>
   <text x="20" y="126" class="svg-label">PAGED <tspan class="svg-ink">/ 204</tspan></text>
-  <rect x="20" y="133" width="194.3" height="48" fill="url(#pm-paged)"/>
+  <rect class="pm-paged-bar" x="20" y="133" width="194.3" height="48" fill="url(#pm-paged)"/>
   <rect x="214.3" y="133" width="285.7" height="48" fill="none" stroke="#141511" stroke-opacity=".12" stroke-dasharray="3 4"/>
   <line x1="20" y1="210" x2="500" y2="210" stroke="#141511" stroke-opacity=".14"/>
   <text x="20" y="231" class="svg-label">8 SEQUENCES <tspan class="svg-ink">/ hit 1.0 / frag 0.98%</tspan></text>
@@ -177,9 +377,10 @@
   <div class="case-links">
     <a class="text-link strong" href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
     <a class="text-link" href="https://github.com/DastanZar/pagemem/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+    <a class="text-link" href="app/pagemem/index.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
   </div>
 </article>
-<article class="case-mini reveal" id="cplan">
+<article class="case-mini reveal" id="cplan" data-ink-point data-ink-say="cplan. the receipt is in the repo.">
   <div class="case-meta"><span class="case-no">03</span><span>Serving / scheduling</span><span>2026</span></div>
   <h3>cplan</h3>
   <div class="mini-viz">
@@ -193,7 +394,7 @@
     <text x="500" y="25" text-anchor="end" class="svg-label">TTFT / MS</text>
   </g>
   <line x1="42" y1="202.0" x2="508" y2="202.0" stroke="#141511" stroke-opacity=".10" stroke-dasharray="2 4"/><text x="34" y="205.0" text-anchor="end" class="svg-micro">0</text><line x1="42" y1="132.0" x2="508" y2="132.0" stroke="#141511" stroke-opacity=".10" stroke-dasharray="2 4"/><text x="34" y="135.0" text-anchor="end" class="svg-micro">500</text><line x1="42" y1="62.0" x2="508" y2="62.0" stroke="#141511" stroke-opacity=".10" stroke-dasharray="2 4"/><text x="34" y="65.0" text-anchor="end" class="svg-micro">1000</text>
-  <rect x="79.2" y="149.6" width="18" height="52.4" fill="#141511" opacity=".18"/><rect x="103.2" y="197.3" width="18" height="4.7" fill="#E9491B"/><text x="88.2" y="142.6" text-anchor="middle" class="svg-micro">374</text><text x="112.2" y="188.3" text-anchor="middle" class="svg-accent micro">34</text><text x="100.2" y="221" text-anchor="middle" class="svg-label">0.8/s</text><rect x="195.8" y="122.8" width="18" height="79.2" fill="#141511" opacity=".18"/><rect x="219.8" y="197.1" width="18" height="4.9" fill="#E9491B"/><text x="204.8" y="115.8" text-anchor="middle" class="svg-micro">565</text><text x="228.8" y="188.1" text-anchor="middle" class="svg-accent micro">35</text><text x="216.8" y="221" text-anchor="middle" class="svg-label">1.5/s</text><rect x="312.2" y="102.4" width="18" height="99.6" fill="#141511" opacity=".18"/><rect x="336.2" y="196.8" width="18" height="5.2" fill="#E9491B"/><text x="321.2" y="95.4" text-anchor="middle" class="svg-micro">711</text><text x="345.2" y="187.8" text-anchor="middle" class="svg-accent micro">37</text><text x="333.2" y="221" text-anchor="middle" class="svg-label">2.5/s</text><rect x="428.8" y="60.4" width="18" height="141.6" fill="#141511" opacity=".18"/><rect x="452.8" y="196.6" width="18" height="5.4" fill="#E9491B"/><text x="437.8" y="53.4" text-anchor="middle" class="svg-micro">1011</text><text x="461.8" y="187.6" text-anchor="middle" class="svg-accent micro">39</text><text x="449.8" y="221" text-anchor="middle" class="svg-label">4.0/s</text>
+  <rect class="cp-bar" style="--bar-i:0" x="79.2" y="149.6" width="18" height="52.4" fill="#141511" opacity=".18"/><rect class="cp-bar" style="--bar-i:1" x="103.2" y="197.3" width="18" height="4.7" fill="#E9491B"/><text x="88.2" y="142.6" text-anchor="middle" class="svg-micro">374</text><text x="112.2" y="188.3" text-anchor="middle" class="svg-accent micro">34</text><text x="100.2" y="221" text-anchor="middle" class="svg-label">0.8/s</text><rect class="cp-bar" style="--bar-i:2" x="195.8" y="122.8" width="18" height="79.2" fill="#141511" opacity=".18"/><rect class="cp-bar" style="--bar-i:3" x="219.8" y="197.1" width="18" height="4.9" fill="#E9491B"/><text x="204.8" y="115.8" text-anchor="middle" class="svg-micro">565</text><text x="228.8" y="188.1" text-anchor="middle" class="svg-accent micro">35</text><text x="216.8" y="221" text-anchor="middle" class="svg-label">1.5/s</text><rect class="cp-bar" style="--bar-i:4" x="312.2" y="102.4" width="18" height="99.6" fill="#141511" opacity=".18"/><rect class="cp-bar" style="--bar-i:5" x="336.2" y="196.8" width="18" height="5.2" fill="#E9491B"/><text x="321.2" y="95.4" text-anchor="middle" class="svg-micro">711</text><text x="345.2" y="187.8" text-anchor="middle" class="svg-accent micro">37</text><text x="333.2" y="221" text-anchor="middle" class="svg-label">2.5/s</text><rect class="cp-bar" style="--bar-i:6" x="428.8" y="60.4" width="18" height="141.6" fill="#141511" opacity=".18"/><rect class="cp-bar" style="--bar-i:7" x="452.8" y="196.6" width="18" height="5.4" fill="#E9491B"/><text x="437.8" y="53.4" text-anchor="middle" class="svg-micro">1011</text><text x="461.8" y="187.6" text-anchor="middle" class="svg-accent micro">39</text><text x="449.8" y="221" text-anchor="middle" class="svg-label">4.0/s</text>
   <line x1="42" y1="202" x2="508" y2="202" stroke="#141511" stroke-opacity=".3"/>
   <text x="20" y="234" class="svg-label">1.5/S CASE <tspan class="svg-ink">/ 34.7 vs 565.5 ms</tspan></text>
 </svg>
@@ -203,6 +404,7 @@
   <div class="case-links">
     <a class="text-link strong" href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
     <a class="text-link" href="https://github.com/DastanZar/cplan/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+    <a class="text-link" href="app/cplan/index.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
   </div>
 </article></div>
 
@@ -213,49 +415,49 @@
         </div>
         <a class="text-link" href="https://github.com/DastanZar?tab=repositories" target="_blank" rel="noopener">All repositories <span aria-hidden="true">↗</span></a>
       </div>
-      <div class="ship-list"><a class="ship-row reveal" href="https://github.com/DastanZar/softfp8" target="_blank" rel="noopener" data-preview="assets/softfp8.png" data-preview-project="softfp8" data-preview-metric="2.0×" data-preview-label="weight bytes">
+      <div class="ship-list"><a class="ship-row reveal" href="https://github.com/DastanZar/softfp8" target="_blank" rel="noopener" data-preview="assets/softfp8.png" data-preview-project="softfp8" data-preview-metric="2.0×" data-preview-label="weight bytes" data-ink-point data-ink-say="softfp8. still measured.">
         <span class="ship-index">04</span>
         <span class="ship-name">softfp8</span>
         <span class="ship-cat">Quantization</span>
         <span class="ship-claim"><strong>2.0×</strong> weight bytes <i>/</i> 4.87% rel. error</span>
         <span class="ship-arrow" aria-hidden="true">↗</span>
       </a>
-<a class="ship-row reveal" href="https://github.com/DastanZar/latq" target="_blank" rel="noopener" data-preview="assets/latq.png" data-preview-project="latq" data-preview-metric="15.8×" data-preview-label="compression">
+<a class="ship-row reveal" href="https://github.com/DastanZar/latq" target="_blank" rel="noopener" data-preview="assets/latq.png" data-preview-project="latq" data-preview-metric="15.8×" data-preview-label="compression" data-ink-point data-ink-say="latq. still measured.">
         <span class="ship-index">05</span>
         <span class="ship-name">latq</span>
         <span class="ship-cat">Quantization</span>
         <span class="ship-claim"><strong>15.8×</strong> compression <i>/</i> 0.607 rel. error</span>
         <span class="ship-arrow" aria-hidden="true">↗</span>
       </a>
-<a class="ship-row reveal" href="https://github.com/DastanZar/fusednorm" target="_blank" rel="noopener" data-preview="assets/fusednorm.png" data-preview-project="fusednorm" data-preview-metric="33%" data-preview-label="less traffic">
+<a class="ship-row reveal" href="https://github.com/DastanZar/fusednorm" target="_blank" rel="noopener" data-preview="assets/fusednorm.png" data-preview-project="fusednorm" data-preview-metric="33%" data-preview-label="less traffic" data-ink-point data-ink-say="fusednorm. still measured.">
         <span class="ship-index">06</span>
         <span class="ship-name">fusednorm</span>
         <span class="ship-cat">Kernels</span>
         <span class="ship-claim"><strong>33%</strong> less norm-site traffic</span>
         <span class="ship-arrow" aria-hidden="true">↗</span>
       </a>
-<a class="ship-row reveal" href="https://github.com/DastanZar/kvstamp" target="_blank" rel="noopener" data-preview="assets/kvstamp.png" data-preview-project="kvstamp" data-preview-metric="8.0×" data-preview-label="KV compression">
+<a class="ship-row reveal" href="https://github.com/DastanZar/kvstamp" target="_blank" rel="noopener" data-preview="assets/kvstamp.png" data-preview-project="kvstamp" data-preview-metric="8.0×" data-preview-label="KV compression" data-ink-point data-ink-say="kvstamp. still measured.">
         <span class="ship-index">07</span>
         <span class="ship-name">kvstamp</span>
         <span class="ship-cat">KV cache</span>
         <span class="ship-claim"><strong>8.0×</strong> KV compression <i>/</i> 1.14 error</span>
         <span class="ship-arrow" aria-hidden="true">↗</span>
       </a>
-<a class="ship-row reveal" href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener" data-preview="assets/roofline-planner.png" data-preview-project="roofline-planner" data-preview-metric="34" data-preview-label="deployment plans">
+<a class="ship-row reveal" href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener" data-preview="assets/roofline-planner.png" data-preview-project="roofline-planner" data-preview-metric="34" data-preview-label="deployment plans" data-ink-point data-ink-say="roofline-planner. still measured.">
         <span class="ship-index">08</span>
         <span class="ship-name">roofline-planner</span>
         <span class="ship-cat">Planning</span>
         <span class="ship-claim"><strong>34</strong> deployment plans <i>/</i> 5 models × 9 GPUs</span>
         <span class="ship-arrow" aria-hidden="true">↗</span>
       </a>
-<a class="ship-row reveal" href="https://github.com/DastanZar/gembench" target="_blank" rel="noopener" data-preview="assets/gembench.png" data-preview-project="gembench" data-preview-metric="1.8×" data-preview-label="GEMV throughput">
+<a class="ship-row reveal" href="https://github.com/DastanZar/gembench" target="_blank" rel="noopener" data-preview="assets/gembench.png" data-preview-project="gembench" data-preview-metric="1.8×" data-preview-label="GEMV throughput" data-ink-point data-ink-say="gembench. still measured.">
         <span class="ship-index">09</span>
         <span class="ship-name">gembench</span>
         <span class="ship-cat">Kernels</span>
         <span class="ship-claim"><strong>1.8×</strong> GEMV throughput <i>/</i> 64.7 ms</span>
         <span class="ship-arrow" aria-hidden="true">↗</span>
       </a>
-<a class="ship-row reveal" href="https://github.com/DastanZar/bithash" target="_blank" rel="noopener" data-preview="assets/bithash.png" data-preview-project="bithash" data-preview-metric="3.98×" data-preview-label="compression">
+<a class="ship-row reveal" href="https://github.com/DastanZar/bithash" target="_blank" rel="noopener" data-preview="assets/bithash.png" data-preview-project="bithash" data-preview-metric="3.98×" data-preview-label="compression" data-ink-point data-ink-say="bithash. still measured.">
         <span class="ship-index">10</span>
         <span class="ship-name">bithash</span>
         <span class="ship-cat">Compression</span>
@@ -265,11 +467,320 @@
     </div>
   </section>
 
+  <section class="section inventory" id="inventory">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-index">02 / INVENTORY</div>
+        <h2 class="section-title" data-split>Twenty repos. <em>Five layers.</em></h2>
+        <p class="section-note">The ten case files above are the deep cuts. This is the complete public inventory, grouped by the inference layer each repo works on. One receipt-backed metric per card.</p>
+      </div>
+      <div class="inventory-meta reveal" aria-label="Inventory summary">
+      <div><b>20</b><span>public repos</span></div>
+      <div><b>05</b><span>themes</span></div>
+      <div><b>20</b><span>receipt links</span></div>
+      <div><b>03</b><span>live apps</span></div>
+    </div>
+<div class="inventory-theme reveal" data-theme="decode">
+      <div class="inventory-theme-head">
+        <span class="inventory-theme-no">01</span>
+        <h3>Decode loop</h3>
+        <p>Propose, verify, constrain, stream. Four ways to shorten the token loop without changing the output.</p>
+      </div>
+      <div class="inventory-grid">
+        <article class="inventory-card" data-theme="decode">
+          <div class="inventory-card-top">
+            <span class="inventory-no">01</span>
+            <span class="inventory-cat">Speculative decoding</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">sdecode</a></h4>
+          <p class="inventory-claim"><strong>5.69×</strong> tokens per target call</p>
+          <p class="inventory-desc">Measured draft/verify on real GPT-2 weights, token-identical to the naive lane.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/sdecode/blob/main/receipts/real_run.json" target="_blank" rel="noopener">receipt</a>
+            <a class="inventory-app" href="app/sdecode/index.html" target="_blank" rel="noopener">app <span aria-hidden="true">↗</span></a>
+          </div>
+        </article><article class="inventory-card" data-theme="decode">
+          <div class="inventory-card-top">
+            <span class="inventory-no">02</span>
+            <span class="inventory-cat">Speculative decoding</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/treetrace" target="_blank" rel="noopener">treetrace</a></h4>
+          <p class="inventory-claim"><strong>5.28×</strong> packed node pass</p>
+          <p class="inventory-desc">Random 2-layer CPU model: nearby drafts accept 3 of 4 tokens. The packed node pass is 5.28× faster, but end-to-end is only 1.06×; independent drafts regress.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/treetrace" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/treetrace/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="decode">
+          <div class="inventory-card-top">
+            <span class="inventory-no">03</span>
+            <span class="inventory-cat">Structured decoding</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/pushdown" target="_blank" rel="noopener">pushdown</a></h4>
+          <p class="inventory-claim"><strong>25/103</strong> legal tokens</p>
+          <p class="inventory-desc">Stack-aware JSON mask keeps 25 of 103 tokens at the value state. A 1,024-deep synthetic stack parses in 51 ms; not a production DFA.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/pushdown" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/pushdown/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="decode">
+          <div class="inventory-card-top">
+            <span class="inventory-no">04</span>
+            <span class="inventory-cat">Token streaming</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/streamdetok" target="_blank" rel="noopener">streamdetok</a></h4>
+          <p class="inventory-claim"><strong>60.1×</strong> faster <i>/</i> 0 replacements</p>
+          <p class="inventory-desc">CPU byte-level test: 128-byte chunks over a 2,880-byte payload, 60.1× faster than the custom path with zero replacements, versus 18 naive splits. No tokenizer context.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/streamdetok" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/streamdetok/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article>
+      </div>
+    </div>
+<div class="inventory-theme reveal" data-theme="serving">
+      <div class="inventory-theme-head">
+        <span class="inventory-theme-no">02</span>
+        <h3>Serving control</h3>
+        <p>Batch, chunk, admit, route. Control the queue before it controls p99.</p>
+      </div>
+      <div class="inventory-grid">
+        <article class="inventory-card" data-theme="serving">
+          <div class="inventory-card-top">
+            <span class="inventory-no">05</span>
+            <span class="inventory-cat">Serving / scheduling</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">cplan</a></h4>
+          <p class="inventory-claim"><strong>94%</strong> lower TTFT</p>
+          <p class="inventory-desc">Continuous batching against a static scheduler, with p99 in the same receipt.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/cplan/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+            <a class="inventory-app" href="app/cplan/index.html" target="_blank" rel="noopener">app <span aria-hidden="true">↗</span></a>
+          </div>
+        </article><article class="inventory-card" data-theme="serving">
+          <div class="inventory-card-top">
+            <span class="inventory-no">06</span>
+            <span class="inventory-cat">Serving / scheduling</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/chunkpipe" target="_blank" rel="noopener">chunkpipe</a></h4>
+          <p class="inventory-claim"><strong>71.7%</strong> lower p95 TTFT <i>/</i> 1 burst/s</p>
+          <p class="inventory-desc">Synthetic CPU service model, Poisson bursts, six requests each: 128→8192-token chunks cut p95 TTFT from 21.7s to 6.1s at 1 burst/s; the 5/s gain is 46.7%.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/chunkpipe" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/chunkpipe/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="serving">
+          <div class="inventory-card-top">
+            <span class="inventory-no">07</span>
+            <span class="inventory-cat">Admission control</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/gatekeeper" target="_blank" rel="noopener">gatekeeper</a></h4>
+          <p class="inventory-claim"><strong>71.8%</strong> lower p95 response</p>
+          <p class="inventory-desc">Synthetic CPU open-loop burst, 300 requests: token bucket and GCRA hold p95 at 4.07s versus 14.46s for fixed window; admitted count 90 vs 88.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/gatekeeper" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/gatekeeper/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="serving">
+          <div class="inventory-card-top">
+            <span class="inventory-no">08</span>
+            <span class="inventory-cat">Prefix routing</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/radixlite" target="_blank" rel="noopener">radixlite</a></h4>
+          <p class="inventory-claim"><strong>92.3%</strong> prefill saved</p>
+          <p class="inventory-desc">CPU token-slot simulation: cache-aware routing saves 92.3% of prefill tokens at a 128-slot budget; round-robin saves 73.4%. Routing costs 58.1ms vs 23.9ms.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/radixlite" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/radixlite/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article>
+      </div>
+    </div>
+<div class="inventory-theme reveal" data-theme="memory">
+      <div class="inventory-theme-head">
+        <span class="inventory-theme-no">03</span>
+        <h3>Memory & attention</h3>
+        <p>KV pages, token budgets, expert residency, paged attention. The memory layer, measured.</p>
+      </div>
+      <div class="inventory-grid">
+        <article class="inventory-card" data-theme="memory">
+          <div class="inventory-card-top">
+            <span class="inventory-no">09</span>
+            <span class="inventory-cat">KV memory</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">pagemem</a></h4>
+          <p class="inventory-claim"><strong>59.5%</strong> fewer blocks</p>
+          <p class="inventory-desc">Prefix-shared paged KV; a 504-block baseline collapses to 204 blocks.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/pagemem/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+            <a class="inventory-app" href="app/pagemem/index.html" target="_blank" rel="noopener">app <span aria-hidden="true">↗</span></a>
+          </div>
+        </article><article class="inventory-card" data-theme="memory">
+          <div class="inventory-card-top">
+            <span class="inventory-no">10</span>
+            <span class="inventory-cat">KV cache</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/kvstamp" target="_blank" rel="noopener">kvstamp</a></h4>
+          <p class="inventory-claim"><strong>8.0×</strong> KV compression <i>/</i> 1.14 error</p>
+          <p class="inventory-desc">Token importance at a fixed budget, swept until the error knee is visible.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/kvstamp" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/kvstamp/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="memory">
+          <div class="inventory-card-top">
+            <span class="inventory-no">11</span>
+            <span class="inventory-cat">Expert cache</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/expertcache" target="_blank" rel="noopener">expertcache</a></h4>
+          <p class="inventory-claim"><strong>14.2%</strong> fewer misses <i>/</i> hot scan</p>
+          <p class="inventory-desc">CPU expert-cache policy pack: cost2q cuts misses 14.2% and median CPU 10.7% on the hot scan; phase-shift regresses, and both cases stay in the receipt.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/expertcache" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/expertcache/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="memory">
+          <div class="inventory-card-top">
+            <span class="inventory-no">12</span>
+            <span class="inventory-cat">Attention kernel</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/pagedattn" target="_blank" rel="noopener">pagedattn</a></h4>
+          <p class="inventory-claim"><strong>9/9</strong> parity cases <i>/</i> 3.0e-7 max err</p>
+          <p class="inventory-desc">Synthetic q/k/v on CPU torch: streaming paged attention vs dense gather, 9/9 parity cases, max abs error 3.0e-7. Parity, not a speed win; no CUDA claim.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/pagedattn" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/pagedattn/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article>
+      </div>
+    </div>
+<div class="inventory-theme reveal" data-theme="numerics">
+      <div class="inventory-theme-head">
+        <span class="inventory-theme-no">04</span>
+        <h3>Numerics & compression</h3>
+        <p>Weights, lattices, codebooks, bit-level softmax. Fewer bits, visible error.</p>
+      </div>
+      <div class="inventory-grid">
+        <article class="inventory-card" data-theme="numerics">
+          <div class="inventory-card-top">
+            <span class="inventory-no">13</span>
+            <span class="inventory-cat">Quantization</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/softfp8" target="_blank" rel="noopener">softfp8</a></h4>
+          <p class="inventory-claim"><strong>2.0×</strong> weight bytes <i>/</i> 4.87% rel. error</p>
+          <p class="inventory-desc">W8 weight path, measured output error and a labelled bandwidth model.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/softfp8" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/softfp8/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="numerics">
+          <div class="inventory-card-top">
+            <span class="inventory-no">14</span>
+            <span class="inventory-cat">Quantization</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/latq" target="_blank" rel="noopener">latq</a></h4>
+          <p class="inventory-claim"><strong>15.8×</strong> compression <i>/</i> 0.607 rel. error</p>
+          <p class="inventory-desc">D8/D4/Z2 lattice ladder from 4 to 1 bit per weight; the 1-bit point sits within 1% of the Gaussian R-D floor.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/latq" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/latq/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="numerics">
+          <div class="inventory-card-top">
+            <span class="inventory-no">15</span>
+            <span class="inventory-cat">Compression</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/bithash" target="_blank" rel="noopener">bithash</a></h4>
+          <p class="inventory-claim"><strong>3.98×</strong> compression <i>/</i> 4.02 bpw</p>
+          <p class="inventory-desc">A four-bit codebook study: uniform16 beats odd16 on dense weight rows.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/bithash" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/bithash/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="numerics">
+          <div class="inventory-card-top">
+            <span class="inventory-no">16</span>
+            <span class="inventory-cat">Numerics</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/bitforge" target="_blank" rel="noopener">bitforge</a></h4>
+          <p class="inventory-claim"><strong>100%</strong> decidable argmax <i>/</i> 0.00239 max dev</p>
+          <p class="inventory-desc">4-bit softmax path with 100% argmax agreement on decidable rows and 0.00239 max probability deviation; near ties are reported separately.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/bitforge" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/bitforge/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article>
+      </div>
+    </div>
+<div class="inventory-theme reveal" data-theme="kernels">
+      <div class="inventory-theme-head">
+        <span class="inventory-theme-no">05</span>
+        <h3>Kernels & topology</h3>
+        <p>Norm traffic, GEMV, placement, collectives. The shapes around the model.</p>
+      </div>
+      <div class="inventory-grid">
+        <article class="inventory-card" data-theme="kernels">
+          <div class="inventory-card-top">
+            <span class="inventory-no">17</span>
+            <span class="inventory-cat">Kernels</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/fusednorm" target="_blank" rel="noopener">fusednorm</a></h4>
+          <p class="inventory-claim"><strong>33%</strong> less norm-site traffic</p>
+          <p class="inventory-desc">RMSNorm, residual, and SwiGLU epilogue fused into one pass; 1 MiB saved per LLaMA-3 8B decode token.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/fusednorm" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/fusednorm/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="kernels">
+          <div class="inventory-card-top">
+            <span class="inventory-no">18</span>
+            <span class="inventory-cat">Kernels</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/gembench" target="_blank" rel="noopener">gembench</a></h4>
+          <p class="inventory-claim"><strong>1.8×</strong> GEMV throughput <i>/</i> 64.7 ms</p>
+          <p class="inventory-desc">A bandwidth-honest GEMV ladder: 119.2 ms naive rows vs 64.7 ms torch.mv, measured on CPU.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/gembench" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/gembench/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="kernels">
+          <div class="inventory-card-top">
+            <span class="inventory-no">19</span>
+            <span class="inventory-cat">Planning</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener">roofline-planner</a></h4>
+          <p class="inventory-claim"><strong>34</strong> deployment plans <i>/</i> 5 models × 9 GPUs</p>
+          <p class="inventory-desc">Fit-check, roofline regime, and decode throughput for every plan.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/roofline-planner/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article><article class="inventory-card" data-theme="kernels">
+          <div class="inventory-card-top">
+            <span class="inventory-no">20</span>
+            <span class="inventory-cat">Collectives</span>
+          </div>
+          <h4><a href="https://github.com/DastanZar/ring" target="_blank" rel="noopener">ring</a></h4>
+          <p class="inventory-claim"><strong>2.01 GB/s</strong> busbw <i>/</i> 4 ranks</p>
+          <p class="inventory-desc">Five rank counts on loopback TCP: N=4 busbw 2.01 GB/s; N=8 falls to 0.99 GB/s. Formula-normalized, not NCCL or GPU scaling.</p>
+          <div class="inventory-links">
+            <a class="text-link" href="https://github.com/DastanZar/ring" target="_blank" rel="noopener">repo</a>
+            <a class="text-link" href="https://github.com/DastanZar/ring/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt</a>
+          </div>
+        </article>
+      </div>
+    </div>
+    </div>
+  </section>
+
   <section class="receipts" id="receipts">
     <div class="wrap">
       <div class="section-head section-head-dark reveal">
-        <div class="section-index">02 / RECEIPTS</div>
-        <h2 class="section-title serif-title">The receipt is the <em>résumé.</em></h2>
+        <div class="section-index">03 / RECEIPTS</div>
+        <h2 class="section-title serif-title" data-split>The receipt is the <em>résumé.</em></h2>
         <p class="section-note">Not a screenshot of a benchmark. The committed JSON that generated every number on this page.</p>
       </div>
       <div class="receipt-grid">
@@ -300,11 +811,11 @@
   <section class="section method" id="method">
     <div class="wrap">
       <div class="section-head reveal">
-        <div class="section-index">03 / METHOD</div>
-        <h2 class="section-title">Method, not <em>magic.</em></h2>
+        <div class="section-index">04 / METHOD</div>
+        <h2 class="section-title" data-split>Method, not <em>magic.</em></h2>
         <p class="section-note">The same contract in every repo, so the numbers can be compared instead of admired.</p>
       </div>
-      <div class="method-quote reveal">“A benchmark is an argument. <em>A receipt is evidence.</em>”</div>
+      <div class="method-quote reveal" data-split>“A benchmark is an argument. <em>A receipt is evidence.</em>”</div>
       <div class="method-grid">
         <article class="method-step reveal">
           <span class="method-no">01</span>
@@ -335,14 +846,14 @@
   <section class="section about" id="about">
     <div class="wrap about-grid">
       <div class="about-intro reveal">
-        <div class="section-index">04 / ABOUT</div>
-        <h2>Systems engineer.<br><em>Allergic to hand-waving.</em></h2>
+        <div class="section-index">05 / ABOUT</div>
+        <h2 data-split>Systems engineer.<br><em>Allergic to hand-waving.</em></h2>
         <div class="about-mark" aria-hidden="true">AC<span>/</span>26</div>
       </div>
       <div class="about-copy reveal">
         <p class="about-lede">I'm Abhinav Chauhan. I work on the unglamorous layer between a model and its bill.</p>
         <p>Caches, kernels, schedulers, and decoding loops. I like small, complete projects with sharp claims and honest measurements — the kind of work that survives a p99, a tight GPU budget, and a reviewer who asks where the number came from.</p>
-        <p>This portfolio is a series of ten standalone systems, each built around one inference problem and one receipt. The remaining ten are in progress.</p>
+        <p>Twenty public repos; ten deep case files and a 20-card index on this page. Each case file is built around one inference problem and one committed receipt. The index keeps the rest of the inventory inspectable by layer, not by chronology.</p>
         <div class="focus" aria-label="Focus areas">
           <span>Quantization</span><span>KV memory</span><span>Scheduling</span><span>Kernels</span><span>Speculative decoding</span>
         </div>
@@ -358,8 +869,8 @@
 
 <section class="outro">
   <div class="wrap">
-    <div class="outro-top"><span class="section-index">05 / NEXT</span><span class="outro-year">PORTFOLIO / 2026</span></div>
-    <h2>Have a system that needs to get <em>cheaper?</em></h2>
+    <div class="outro-top"><span class="section-index">06 / NEXT</span><span class="outro-year">PORTFOLIO / 2026</span></div>
+    <h2 data-split>Have a system that needs to get <em>cheaper?</em></h2>
     <div class="outro-row">
       <p>I'm open to MLSys and inference engineering roles. Start with the receipts — then bring me the p99.</p>
       <a class="btn btn-light" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
@@ -371,6 +882,12 @@
     </footer>
   </div>
 </section>
+
+<button class="ink-tab" type="button" data-ink-tab aria-label="Ink is following the page. Click to make Ink do a trick.">
+  <span class="ink-tab-label"><b>INK</b><span>001</span></span>
+  <svg viewBox="0 0 120 120" aria-hidden="true"><use href="#ink-tab-mark"></use></svg>
+  <span class="ink-tab-bubble" data-ink-tab-bubble>still counting.</span>
+</button>
 
 <script src="receipts-data.js"></script>
 <script src="app.js"></script>

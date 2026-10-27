@@ -32,11 +32,6 @@ def mean(values: list[float]) -> float:
     return sum(values) / len(values)
 
 
-def lane_mean(pair: dict, lane: str, key: str) -> float:
-    runs = [r for r in pair["runs"] if r["lane"] == lane]
-    return mean([r[key] for r in runs])
-
-
 # ---------------------------------------------------------------------------
 # Receipts -> values
 # ---------------------------------------------------------------------------
@@ -51,12 +46,37 @@ bithash = load("bithash")
 roofline = load("roofline-planner")
 sdecode = load("sdecode_real_run")
 
-sd_pair = next(p for p in sdecode["pairs"] if p["pair"] == "gpt2<-distilgpt2")
-sd_tpc = lane_mean(sd_pair, "fixed-k8", "tokens_per_target_call")
-sd_calls = lane_mean(sd_pair, "fixed-k8", "target_calls")
-sd_adaptive = lane_mean(sd_pair, "adaptive", "tokens_per_target_call")
-sd_c = sd_pair["drafter_cost_c"]
-sd_match = all(r["matches_reference"] for p in sdecode["pairs"] for r in p["runs"])
+# Group 2 receipts: the rest of the 20-repo inventory.
+bitforge = load("bitforge")
+chunkpipe_receipt = load("chunkpipe")
+expertcache = load("expertcache")
+gatekeeper = load("gatekeeper")
+pagedattn = load("pagedattn")
+pushdown = load("pushdown")
+radixlite = load("radixlite")
+ring = load("ring")
+streamdetok = load("streamdetok")
+treetrace = load("treetrace")
+
+sd_exp = next(
+    e for e in sdecode["experiments"]
+    if e["target"] == "gpt2" and e["drafter"] == "distilgpt2"
+)
+
+
+def sd_mean(lane: str, key: str) -> float:
+    return mean([p[lane][key] for p in sd_exp["prompts"]])
+
+
+sd_tpc = sd_mean("fixed_k8", "tokens_per_target_forward")
+sd_calls = sd_mean("fixed_k8", "target_forwards")
+sd_adaptive = sd_mean("adaptive", "tokens_per_target_forward")
+sd_c = sd_exp["drafter_cost_measured"]
+sd_match = all(
+    all(p["identity"].values())
+    for experiment in sdecode["experiments"]
+    for p in experiment["prompts"]
+)
 sd_identity = "100% token match" if sd_match else "identity checked"
 sd_identity_pct = "100%" if sd_match else "checked"
 
@@ -114,6 +134,60 @@ rl_count = len(roofline)
 rl_gpus = len({v["gpu"] for v in roofline.values()})
 rl_models = len({v["model"] for v in roofline.values()})
 
+bf4 = bitforge["softmax"]["bits4"]
+bf_argmax = bf4["argmax_agreement_pct_decidable"]
+bf_dev = bf4["max_prob_deviation"]
+
+chunk_rows_1 = chunkpipe_receipt["sweep"]["1"]
+chunk_rows_5 = chunkpipe_receipt["sweep"]["5"]
+chunk_128_1 = next(r for r in chunk_rows_1 if r["chunk"] == 128)
+chunk_8192_1 = next(r for r in chunk_rows_1 if r["chunk"] == 8192)
+chunk_128_5 = next(r for r in chunk_rows_5 if r["chunk"] == 128)
+chunk_8192_5 = next(r for r in chunk_rows_5 if r["chunk"] == 8192)
+chunk_drop_1 = 100 * (1 - chunk_8192_1["ttft_p95_ms"] / chunk_128_1["ttft_p95_ms"])
+chunk_drop_5 = 100 * (1 - chunk_8192_5["ttft_p95_ms"] / chunk_128_5["ttft_p95_ms"])
+
+ec_hot = [
+    c for c in expertcache["cases"]
+    if c["trace"] == "hot_scan" and c["capacity_bytes"] == 18144
+]
+ec_lru = next(c for c in ec_hot if c["policy"] == "lru")
+ec_cost2q = next(c for c in ec_hot if c["policy"] == "cost2q")
+ec_miss_drop = 100 * (1 - ec_cost2q["misses"] / ec_lru["misses"])
+ec_cpu_drop = 100 * (1 - ec_cost2q["median_cpu_ms"] / ec_lru["median_cpu_ms"])
+
+gk_fixed = gatekeeper["results"]["fixed_window"]
+gk_bucket = gatekeeper["results"]["token_bucket"]
+gk_p95_drop = 100 * (1 - gk_bucket["p95_response_s"] / gk_fixed["p95_response_s"])
+
+pa_cases = len(pagedattn["cases"])
+pa_err = max(c["max_abs_error"] for c in pagedattn["cases"])
+pa_err_label = f"{pa_err * 1e7:.1f}e-7"
+
+pd_deep = pushdown["depth_scaling"][-1]
+pd_ms = pd_deep["pda"]["median_us"] / 1000
+pd_value = next(s for s in pushdown["selectivity"] if s["state"] == "value")
+
+rl_session = [
+    r for r in radixlite["rows"]
+    if r["workload"] == "session" and r["budget_token_slots"] == 128
+]
+rl_rr = next(r for r in rl_session if r["policy"] == "round_robin")
+rl_ca = next(r for r in rl_session if r["policy"] == "cache_aware")
+rl_rr_ms = radixlite["timings"]["round_robin"]["median_us"] / 1000
+rl_ca_ms = radixlite["timings"]["cache_aware"]["median_us"] / 1000
+
+ring4 = next(m for m in ring["measurements"] if m["N"] == 4)
+ring8 = next(m for m in ring["measurements"] if m["N"] == 8)
+
+stream128 = streamdetok["chunk_sweep"][-1]
+stream_x = stream128["custom"]["median_us"] / stream128["codecs"]["median_us"]
+
+tt_near = next(c for c in treetrace["cases"] if c["case"] == "nearby_draft")["medians"]
+tt_ind = next(c for c in treetrace["cases"] if c["case"] == "independent_draft")["medians"]
+tt_node_x = tt_near["node_sequential_ms"] / tt_near["node_packed_ms"]
+tt_total_x = tt_near["sequential_ms"] / tt_near["packed_ms"]
+
 # Guardrails: fail the build if the receipts stop saying what the page says.
 assert sd_tpc > 2.0 and sd_c < 0.7
 assert sd_match, "sdecode token identity check failed"
@@ -121,6 +195,16 @@ assert pm_paged == 204 and pm_base == 504
 assert cp_peak["improvement"] == 94
 assert abs(fn_reduction - 0.333) < 0.001
 assert bh_x == 3.98
+assert bf_argmax == 100.0 and bf_dev < 0.003
+assert chunk_drop_1 > 70 and chunk_drop_5 > 45
+assert ec_cost2q["misses"] < ec_lru["misses"] and ec_cpu_drop > 10
+assert gk_p95_drop > 70
+assert pagedattn["parity_ok"] is True and pa_err < 1e-6
+assert pd_deep["pda_accepts"] is True and pd_ms < 60
+assert rl_ca["prefill_saved_pct"] > rl_rr["prefill_saved_pct"]
+assert ring4["busbw_gbps"] > ring8["busbw_gbps"]
+assert stream_x > 60 and stream128["custom_replacements"] == 0
+assert tt_node_x > 5 and tt_total_x > 1 and tt_ind["accepted"] == 0
 
 # ---------------------------------------------------------------------------
 # Project manifest: one entry per public repo. Copy + links only.
@@ -263,6 +347,219 @@ def receipt_label(slug: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# 20-card inventory: the complete public index, grouped by inference layer.
+# ---------------------------------------------------------------------------
+APP_PATHS = {
+    "sdecode": "app/sdecode/index.html",
+    "pagemem": "app/pagemem/index.html",
+    "cplan": "app/cplan/index.html",
+}
+
+inventory_themes = [
+    (
+        "decode",
+        "Decode loop",
+        "Propose, verify, constrain, stream. Four ways to shorten the token loop without changing the output.",
+    ),
+    (
+        "serving",
+        "Serving control",
+        "Batch, chunk, admit, route. Control the queue before it controls p99.",
+    ),
+    (
+        "memory",
+        "Memory & attention",
+        "KV pages, token budgets, expert residency, paged attention. The memory layer, measured.",
+    ),
+    (
+        "numerics",
+        "Numerics & compression",
+        "Weights, lattices, codebooks, bit-level softmax. Fewer bits, visible error.",
+    ),
+    (
+        "kernels",
+        "Kernels & topology",
+        "Norm traffic, GEMV, placement, collectives. The shapes around the model.",
+    ),
+]
+
+inventory_specs = [
+    ("decode", ["sdecode", "treetrace", "pushdown", "streamdetok"]),
+    ("serving", ["cplan", "chunkpipe", "gatekeeper", "radixlite"]),
+    ("memory", ["pagemem", "kvstamp", "expertcache", "pagedattn"]),
+    ("numerics", ["softfp8", "latq", "bithash", "bitforge"]),
+    ("kernels", ["fusednorm", "gembench", "roofline-planner", "ring"]),
+]
+
+inventory_custom = {
+    "treetrace": {
+        "category": "Speculative decoding",
+        "claim": f"<strong>{tt_node_x:.2f}×</strong> packed node pass",
+        "description": (
+            f"Random 2-layer CPU model: nearby drafts accept {tt_near['accepted']:.0f} of "
+            f"{tt_near['emitted']:.0f} tokens. The packed node pass is {tt_node_x:.2f}× faster, "
+            f"but end-to-end is only {tt_total_x:.2f}×; independent drafts regress."
+        ),
+    },
+    "pushdown": {
+        "category": "Structured decoding",
+        "claim": f"<strong>{pd_value['kept']}/{pd_value['vocab_size']}</strong> legal tokens",
+        "description": (
+            f"Stack-aware JSON mask keeps {pd_value['kept']} of {pd_value['vocab_size']} tokens at the "
+            f"value state. A {pd_deep['depth']:,}-deep synthetic stack parses in {pd_ms:.0f} ms; "
+            "not a production DFA."
+        ),
+    },
+    "streamdetok": {
+        "category": "Token streaming",
+        "claim": f"<strong>{stream_x:.1f}×</strong> faster <i>/</i> 0 replacements",
+        "description": (
+            f"CPU byte-level test: 128-byte chunks over a {stream128['input_bytes']:,}-byte payload, "
+            f"{stream_x:.1f}× faster than the custom path with zero replacements, versus "
+            f"{stream128['naive_replacements']} naive splits. No tokenizer context."
+        ),
+    },
+    "chunkpipe": {
+        "category": "Serving / scheduling",
+        "claim": f"<strong>{chunk_drop_1:.1f}%</strong> lower p95 TTFT <i>/</i> 1 burst/s",
+        "description": (
+            f"Synthetic CPU service model, Poisson bursts, six requests each: 128→8192-token chunks cut "
+            f"p95 TTFT from {chunk_128_1['ttft_p95_ms'] / 1000:.1f}s to "
+            f"{chunk_8192_1['ttft_p95_ms'] / 1000:.1f}s at 1 burst/s; the 5/s gain is {chunk_drop_5:.1f}%."
+        ),
+    },
+    "gatekeeper": {
+        "category": "Admission control",
+        "claim": f"<strong>{gk_p95_drop:.1f}%</strong> lower p95 response",
+        "description": (
+            f"Synthetic CPU open-loop burst, 300 requests: token bucket and GCRA hold p95 at "
+            f"{gk_bucket['p95_response_s']:.2f}s versus {gk_fixed['p95_response_s']:.2f}s for fixed "
+            f"window; admitted count {gk_bucket['admitted']} vs {gk_fixed['admitted']}."
+        ),
+    },
+    "radixlite": {
+        "category": "Prefix routing",
+        "claim": f"<strong>{rl_ca['prefill_saved_pct']:.1f}%</strong> prefill saved",
+        "description": (
+            f"CPU token-slot simulation: cache-aware routing saves {rl_ca['prefill_saved_pct']:.1f}% of "
+            f"prefill tokens at a 128-slot budget; round-robin saves {rl_rr['prefill_saved_pct']:.1f}%. "
+            f"Routing costs {rl_ca_ms:.1f}ms vs {rl_rr_ms:.1f}ms."
+        ),
+    },
+    "expertcache": {
+        "category": "Expert cache",
+        "claim": f"<strong>{ec_miss_drop:.1f}%</strong> fewer misses <i>/</i> hot scan",
+        "description": (
+            f"CPU expert-cache policy pack: cost2q cuts misses {ec_miss_drop:.1f}% and median CPU "
+            f"{ec_cpu_drop:.1f}% on the hot scan; phase-shift regresses, and both cases stay in the receipt."
+        ),
+    },
+    "pagedattn": {
+        "category": "Attention kernel",
+        "claim": f"<strong>{pa_cases}/{pa_cases}</strong> parity cases <i>/</i> {pa_err_label} max err",
+        "description": (
+            f"Synthetic q/k/v on CPU torch: streaming paged attention vs dense gather, "
+            f"{pa_cases}/{pa_cases} parity cases, max abs error {pa_err_label}. Parity, not a speed "
+            "win; no CUDA claim."
+        ),
+    },
+    "bitforge": {
+        "category": "Numerics",
+        "claim": f"<strong>{bf_argmax:.0f}%</strong> decidable argmax <i>/</i> {bf_dev:.5f} max dev",
+        "description": (
+            f"4-bit softmax path with {bf_argmax:.0f}% argmax agreement on decidable rows and "
+            f"{bf_dev:.5f} max probability deviation; near ties are reported separately."
+        ),
+    },
+    "ring": {
+        "category": "Collectives",
+        "claim": f"<strong>{ring4['busbw_gbps']:.2f} GB/s</strong> busbw <i>/</i> 4 ranks",
+        "description": (
+            f"Five rank counts on loopback TCP: N=4 busbw {ring4['busbw_gbps']:.2f} GB/s; N=8 falls to "
+            f"{ring8['busbw_gbps']:.2f} GB/s. Formula-normalized, not NCCL or GPU scaling."
+        ),
+    },
+}
+
+inventory_slugs = [slug for _, slugs in inventory_specs for slug in slugs]
+assert len(inventory_slugs) == 20 and len(set(inventory_slugs)) == 20
+assert set(inventory_slugs) == set(project_by_slug) | set(inventory_custom)
+assert all(len(slugs) == 4 for _, slugs in inventory_specs)
+assert set(APP_PATHS) <= set(inventory_slugs)
+
+
+def inventory_meta() -> str:
+    apps = sum(1 for slug in inventory_slugs if slug in APP_PATHS)
+    return f"""<div class="inventory-meta reveal" aria-label="Inventory summary">
+      <div><b>{len(inventory_slugs)}</b><span>public repos</span></div>
+      <div><b>{len(inventory_themes):02d}</b><span>themes</span></div>
+      <div><b>{len(inventory_slugs)}</b><span>receipt links</span></div>
+      <div><b>{apps:02d}</b><span>live apps</span></div>
+    </div>"""
+
+
+def inventory_cards() -> str:
+    theme_by_id = {theme_id: (name, note) for theme_id, name, note in inventory_themes}
+    blocks = []
+    card_index = 0
+    for theme_index, (theme_id, slugs) in enumerate(inventory_specs, start=1):
+        theme_name, theme_note = theme_by_id[theme_id]
+        cards = []
+        for slug in slugs:
+            card_index += 1
+            if slug in project_by_slug:
+                project = project_by_slug[slug]
+                name = project["name"]
+                category = project["category"]
+                claim = project["claim"]
+                description = project["description"]
+            else:
+                custom = inventory_custom[slug]
+                name = slug
+                category = custom["category"]
+                claim = custom["claim"]
+                description = custom["description"]
+
+            app = APP_PATHS.get(slug)
+            links = (
+                f'<a class="text-link" href="{repo_url(slug)}" target="_blank" rel="noopener">repo</a>\n'
+                f'            <a class="text-link" href="{receipt_url(slug)}" target="_blank" rel="noopener">receipt</a>'
+            )
+            if app:
+                links += (
+                    f'\n            <a class="inventory-app" href="{app}" target="_blank" rel="noopener">app '
+                    '<span aria-hidden="true">↗</span></a>'
+                )
+            cards.append(
+                f"""<article class="inventory-card" data-theme="{theme_id}">
+          <div class="inventory-card-top">
+            <span class="inventory-no">{card_index:02d}</span>
+            <span class="inventory-cat">{category}</span>
+          </div>
+          <h4><a href="{repo_url(slug)}" target="_blank" rel="noopener">{name}</a></h4>
+          <p class="inventory-claim">{claim}</p>
+          <p class="inventory-desc">{description}</p>
+          <div class="inventory-links">
+            {links}
+          </div>
+        </article>"""
+            )
+        blocks.append(
+            f"""<div class="inventory-theme reveal" data-theme="{theme_id}">
+      <div class="inventory-theme-head">
+        <span class="inventory-theme-no">{theme_index:02d}</span>
+        <h3>{theme_name}</h3>
+        <p>{theme_note}</p>
+      </div>
+      <div class="inventory-grid">
+        {''.join(cards)}
+      </div>
+    </div>"""
+        )
+    return "\n".join(blocks)
+
+
+# ---------------------------------------------------------------------------
 # SVG evidence plates
 # ---------------------------------------------------------------------------
 def pagemem_svg() -> str:
@@ -282,7 +579,7 @@ def pagemem_svg() -> str:
   <text x="20" y="43" class="svg-label">PREALLOCATED <tspan class="svg-ink">/ {pm_base}</tspan></text>
   <rect x="20" y="50" width="{full_w}" height="48" fill="url(#pm-base)" stroke="#141511" stroke-opacity=".18"/>
   <text x="20" y="126" class="svg-label">PAGED <tspan class="svg-ink">/ {pm_paged}</tspan></text>
-  <rect x="20" y="133" width="{paged_w:.1f}" height="48" fill="url(#pm-paged)"/>
+  <rect class="pm-paged-bar" x="20" y="133" width="{paged_w:.1f}" height="48" fill="url(#pm-paged)"/>
   <rect x="{20 + paged_w:.1f}" y="133" width="{full_w - paged_w:.1f}" height="48" fill="none" stroke="#141511" stroke-opacity=".12" stroke-dasharray="3 4"/>
   <line x1="20" y1="210" x2="500" y2="210" stroke="#141511" stroke-opacity=".14"/>
   <text x="20" y="231" class="svg-label">8 SEQUENCES <tspan class="svg-ink">/ hit {pm_hit:.1f} / frag {pm_frag * 100:.2f}%</tspan></text>
@@ -306,8 +603,8 @@ def cplan_svg() -> str:
         sx = x + group_w / 2 - bar_w - gap / 2
         cx = x + group_w / 2 + gap / 2
         bars.append(
-            f'<rect x="{sx:.1f}" y="{bottom - static_h:.1f}" width="{bar_w}" height="{static_h:.1f}" fill="#141511" opacity=".18"/>'
-            f'<rect x="{cx:.1f}" y="{bottom - cont_h:.1f}" width="{bar_w}" height="{cont_h:.1f}" fill="#E9491B"/>'
+            f'<rect class="cp-bar" style="--bar-i:{i * 2}" x="{sx:.1f}" y="{bottom - static_h:.1f}" width="{bar_w}" height="{static_h:.1f}" fill="#141511" opacity=".18"/>'
+            f'<rect class="cp-bar" style="--bar-i:{i * 2 + 1}" x="{cx:.1f}" y="{bottom - cont_h:.1f}" width="{bar_w}" height="{cont_h:.1f}" fill="#E9491B"/>'
             f'<text x="{sx + bar_w / 2:.1f}" y="{bottom - static_h - 7:.1f}" text-anchor="middle" class="svg-micro">{row["static"]:.0f}</text>'
             f'<text x="{cx + bar_w / 2:.1f}" y="{bottom - cont_h - 9:.1f}" text-anchor="middle" class="svg-accent micro">{row["continuous"]:.0f}</text>'
             f'<text x="{x + group_w / 2:.1f}" y="{bottom + 19}" text-anchor="middle" class="svg-label">{row["rate"]:.1f}/s</text>'
@@ -339,32 +636,48 @@ def proof_strip() -> str:
     items = [
         {
             "value": f"{fmt(sd_tpc)}×",
+            "count": fmt(sd_tpc),
+            "decimals": 2,
+            "suffix": "×",
             "label": "tokens per target call",
             "source": "sdecode",
             "anchor": "#sdecode",
+            "say": f"{fmt(sd_tpc)} tokens per target call. checked.",
         },
         {
             "value": pm_saved,
+            "count": f"{float(pm_saved.rstrip('%')):.1f}",
+            "decimals": 1,
+            "suffix": "%",
             "label": "fewer KV blocks",
             "source": "pagemem",
             "anchor": "#pagemem",
+            "say": f"{pm_saved} fewer blocks. I counted them twice.",
         },
         {
             "value": f"{cp_peak['improvement']}%",
+            "count": str(cp_peak["improvement"]),
+            "decimals": 0,
+            "suffix": "%",
             "label": "lower TTFT",
             "source": "cplan",
             "anchor": "#cplan",
+            "say": "94 percent lower TTFT. p99 is in the receipt too.",
         },
         {
             "value": f"{bh_x:.2f}×",
+            "count": f"{bh_x:.2f}",
+            "decimals": 2,
+            "suffix": "×",
             "label": "weight compression",
             "source": "bithash",
             "anchor": "#shipping",
+            "say": "3.98 times. the codebook did the work.",
         },
     ]
     return "".join(
-        f"""<div class="proof-item">
-        <span class="proof-num">{item['value']}</span>
+        f"""<div class="proof-item" data-ink-point data-ink-say="{item['say']}">
+        <span class="proof-num" data-count="{item['count']}" data-decimals="{item['decimals']}" data-suffix="{item['suffix']}" aria-label="{item['value']}">{item['value']}</span>
         <span class="proof-label">{item['label']}</span>
         <a class="proof-src" href="{item['anchor']}">{item['source']} <span aria-hidden="true">↗</span></a>
       </div>"""
@@ -374,10 +687,10 @@ def proof_strip() -> str:
 
 def hero_facts() -> str:
     facts = [
-        ("SYSTEMS", "10 shipped"),
-        ("MEASURED ON", "CPU / HF models"),
+        ("CASE FILES", f"{len(projects)} on this page"),
+        ("INVENTORY", f"{len(inventory_slugs)} public repos"),
         ("GPU CLAIMS", "0 unlabeled"),
-        ("RECEIPTS", "10 committed"),
+        ("RECEIPTS", f"{len(inventory_slugs)} linked"),
     ]
     return "".join(
         f'<li><span>{k}</span><strong>{v}</strong></li>' for k, v in facts
@@ -385,7 +698,7 @@ def hero_facts() -> str:
 
 
 def featured_sdecode() -> str:
-    return f"""<article class="case case-featured reveal" id="sdecode">
+    return f"""<article class="case case-featured reveal" id="sdecode" data-ink-point data-ink-say="sdecode. the target-call ledger.">
   <div class="case-copy">
     <div class="case-meta"><span class="case-no">01</span><span>Speculative decoding</span><span>2026</span></div>
     <h3>sdecode</h3>
@@ -402,7 +715,7 @@ def featured_sdecode() -> str:
     <p class="case-note"><span class="note-mark"></span> Negative result included: adaptive K averaged {fmt(sd_adaptive)}× on this pair; both lanes stay in the receipt.</p>
     <div class="case-links">
       <a class="btn btn-ink" href="{repo_url('sdecode')}" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
-      <a class="btn btn-ghost" href="app/sdecode/session.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
+      <a class="btn btn-ghost" href="app/sdecode/index.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
       <a class="text-link" href="{receipt_url('sdecode')}" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
     </div>
   </div>
@@ -410,7 +723,7 @@ def featured_sdecode() -> str:
     <figure class="media-frame">
       <div class="media-top"><span class="media-dots"><i></i><i></i><i></i></span><span>sdecode / recorded run</span><span class="media-live">APP</span></div>
       <img src="assets/sdecode-app.png" alt="sdecode session app showing a recorded run, lane selector, and generated text" loading="eager" width="1440" height="760">
-      <figcaption class="media-bar"><span>APP / session.html</span><span>measured on CPU</span></figcaption>
+      <figcaption class="media-bar"><span>APP / target-call budget</span><span>measured on CPU</span></figcaption>
     </figure>
     <div class="receipt-strip">
       <div><span>TOKENS / CALL</span><strong>{fmt(sd_tpc)}×</strong></div>
@@ -431,9 +744,14 @@ def mini_case(
     svg: str,
     viz_label: str,
     viz_tag: str,
+    app: str | None = None,
 ) -> str:
     name = project_by_slug[slug]["name"]
-    return f"""<article class="case-mini reveal" id="{slug}">
+    app_link = (
+        f'<a class="text-link" href="{app}" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>'
+        if app else ""
+    )
+    return f"""<article class="case-mini reveal" id="{slug}" data-ink-point data-ink-say="{name}. the receipt is in the repo.">
   <div class="case-meta"><span class="case-no">{index}</span><span>{category}</span><span>2026</span></div>
   <h3>{name}</h3>
   <div class="mini-viz">
@@ -445,6 +763,7 @@ def mini_case(
   <div class="case-links">
     <a class="text-link strong" href="{repo_url(slug)}" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
     <a class="text-link" href="{receipt_url(slug)}" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
+    {app_link}
   </div>
 </article>"""
 
@@ -459,6 +778,7 @@ case_duo = (
         svg=pagemem_svg(),
         viz_label="PAGED KV / BLOCK MAP",
         viz_tag="204 / 504",
+        app=APP_PATHS["pagemem"],
     )
     + "\n"
     + mini_case(
@@ -470,6 +790,7 @@ case_duo = (
         svg=cplan_svg(),
         viz_label="CONTINUOUS VS STATIC",
         viz_tag=f"{cp_peak['improvement']}% lower",
+        app=APP_PATHS["cplan"],
     )
 )
 
@@ -478,7 +799,7 @@ def shipping_rows() -> str:
     rows = []
     for project in projects[3:]:
         rows.append(
-            f"""<a class="ship-row reveal" href="{repo_url(project['slug'])}" target="_blank" rel="noopener" data-preview="{project['preview']}" data-preview-project="{project['name']}" data-preview-metric="{project['preview_metric']}" data-preview-label="{project['preview_label']}">
+            f"""<a class="ship-row reveal" href="{repo_url(project['slug'])}" target="_blank" rel="noopener" data-preview="{project['preview']}" data-preview-project="{project['name']}" data-preview-metric="{project['preview_metric']}" data-preview-label="{project['preview_label']}" data-ink-point data-ink-say="{project['name']}. still measured.">
         <span class="ship-index">{project['index']}</span>
         <span class="ship-name">{project['name']}</span>
         <span class="ship-cat">{project['category']}</span>
@@ -513,6 +834,7 @@ def receipts_payload() -> dict:
 # Build
 # ---------------------------------------------------------------------------
 template = (SRC / "template.html").read_text(encoding="utf-8")
+mascot = (SRC / "mascot.svg").read_text(encoding="utf-8")
 payload = receipts_payload()
 
 receipt_js = (
@@ -529,7 +851,9 @@ replacements = {
     "FEATURED": featured_sdecode(),
     "CASE_DUO": case_duo,
     "SHIP_ROWS": shipping_rows(),
+    "INVENTORY": inventory_meta() + "\n" + inventory_cards(),
     "RECEIPT_TABS": receipt_tabs(),
+    "MASCOT": mascot,
     "YEAR": "2026",
 }
 
@@ -540,11 +864,14 @@ for key, value in replacements.items():
 (ROOT / "index.html").write_text(output, encoding="utf-8")
 (ROOT / "receipts-data.js").write_text(receipt_js, encoding="utf-8")
 shutil.copyfile(SRC / "styles.css", ROOT / "styles.css")
+shutil.copyfile(SRC / "motion.css", ROOT / "motion.css")
 shutil.copyfile(SRC / "app.js", ROOT / "app.js")
 shutil.copyfile(SRC / "favicon.svg", ROOT / "favicon.svg")
+shutil.copyfile(SRC / "mascot.svg", ROOT / "assets" / "ink-mascot.svg")
 
 print("built index.html")
 print(f"sdecode: {sd_tpc:.3f} tok/call, c={sd_c:.3f}, adaptive={sd_adaptive:.3f}")
 print(f"pagemem: {pm_paged}/{pm_base} blocks ({pm_saved})")
 print(f"cplan: reference TTFT improvement {cp_peak['improvement']}% at {cp_peak['rate']}/s")
+print(f"inventory: {len(inventory_slugs)} cards, {len(inventory_themes)} themes, {len(APP_PATHS)} apps")
 print(f"receipts: {len(payload)} files embedded")
