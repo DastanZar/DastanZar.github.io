@@ -353,6 +353,7 @@ APP_PATHS = {
     "sdecode": "app/sdecode/index.html",
     "pagemem": "app/pagemem/index.html",
     "cplan": "app/cplan/index.html",
+    "roofline-planner": "app/roofline-planner/index.html",
 }
 
 inventory_themes = [

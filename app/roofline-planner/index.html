@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="roofline-planner deployment desk: pick a model and GPU from 34 committed plans and see the VRAM fit, the roofline ridge, and the batch where memory-bound decode turns compute-bound.">
+  <title>roofline-planner — deployment desk</title>
+  <link rel="stylesheet" href="../_base.css">
+  <script src="data.js"></script>
+  <style>
+    .roofline .scenario h1 {
+      max-width: 900px;
+    }
+
+    .roofline .lede {
+      max-width: 700px;
+      margin-top: 20px;
+      color: var(--ink-soft);
+      font-size: clamp(16px, 1.5vw, 19px);
+      line-height: 1.45;
+    }
+
+    .roofline .lede b {
+      font-weight: 600;
+    }
+
+    .desk-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 0 16px;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toolbar-group .toolbar-models {
+      flex: 1;
+    }
+
+    .plan-sub {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .plan-sub b {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .desk {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.5fr);
+      gap: clamp(18px, 3vw, 42px);
+      align-items: start;
+      padding: 22px 0 14px;
+    }
+
+    .stage {
+      min-width: 0;
+      border-top: 1px solid var(--ink);
+    }
+
+    .stage-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0 9px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stage-head .label {
+      color: var(--ink);
+    }
+
+    .stage-head .sub {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .viz-wrap {
+      padding: 15px 0 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .viz-wrap svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .svg-label {
+      font-family: var(--mono);
+      font-size: 8.6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      fill: var(--muted);
+    }
+
+    .svg-micro {
+      font-family: var(--mono);
+      font-size: 6.6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      fill: var(--muted);
+    }
+
+    .svg-ink { fill: var(--ink); }
+    .svg-accent { fill: var(--accent-dark); }
+
+    .vram-wrap {
+      padding: 15px 0 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .vram-stack {
+      position: relative;
+      display: flex;
+      height: 46px;
+      margin-top: 9px;
+      border: 1px solid var(--line-strong);
+      background: var(--paper-3);
+    }
+
+    .vram-stack div {
+      display: block;
+      height: 100%;
+      transition: width 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .vram-stack .seg-weights { background: var(--ink); }
+    .vram-stack .seg-kv { background: var(--accent); }
+
+    .vram-stack .seg-idle {
+      flex: 1;
+      background:
+        repeating-linear-gradient(135deg, transparent 0 2px, rgba(20, 21, 17, 0.14) 2px 3px),
+        var(--paper-2);
+    }
+
+    .vram-cap {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .vram-cap b {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .plan-ledger {
+      position: sticky;
+      top: 18px;
+      border-top: 4px solid var(--ink);
+      background: var(--paper-2);
+    }
+
+    .plan-ledger-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px 9px;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .plan-ledger-head h2 {
+      font-family: var(--serif);
+      font-size: 29px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .plan-ledger-head span {
+      color: var(--sage);
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+    }
+
+    .plan-ledger dl {
+      margin: 0;
+      padding: 0 14px;
+    }
+
+    .ledger-row2 {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .ledger-row2:last-child { border-bottom: 0; }
+
+    .ledger-row2 dt {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .ledger-row2 dd {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 500;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ledger-row2 dd.big {
+      font-size: 24px;
+      letter-spacing: -0.05em;
+    }
+
+    .ledger-row2 dd.accent { color: var(--accent-dark); }
+
+    .ledger-row2 dd small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+      gap: clamp(20px, 4vw, 60px);
+      align-items: start;
+      margin-top: 18px;
+      padding: 22px 0 30px;
+      border-top: 1px solid var(--ink);
+    }
+
+    .decision .label { margin-bottom: 8px; }
+
+    .decision h2 {
+      max-width: 860px;
+      font-family: var(--serif);
+      font-size: clamp(31px, 4.3vw, 57px);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+    }
+
+    .decision h2 em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .decision p {
+      margin-top: 13px;
+      max-width: 640px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .decision-figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-content: start;
+      padding-top: 5px;
+    }
+
+    .decision-figure {
+      border-top: 1px solid var(--ink);
+      padding-top: 8px;
+    }
+
+    .decision-figure strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: clamp(22px, 2.4vw, 32px);
+      font-weight: 500;
+      letter-spacing: -0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .decision-figure span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.03em;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+
+    .decision-figure.accent strong { color: var(--accent-dark); }
+
+    .plan-table-wrap {
+      border-top: 1px solid var(--ink);
+      padding: 18px 0 30px;
+    }
+
+    .plan-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 10.5px;
+    }
+
+    .plan-table th {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--ink);
+      color: var(--muted);
+      font-size: 8.6px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-align: left;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .plan-table th.num,
+    .plan-table td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .plan-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--line);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .plan-table tbody tr {
+      cursor: pointer;
+      transition: background 120ms ease;
+    }
+
+    .plan-table tbody tr:hover { background: var(--paper-2); }
+
+    .plan-table tbody tr[aria-selected="true"] {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .plan-table tbody tr[aria-selected="true"] .muted-t {
+      color: var(--sage);
+    }
+
+    .plan-table .fit-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 6px;
+      background: var(--accent);
+    }
+
+    .muted-t {
+      color: var(--muted);
+      font-size: 9.5px;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 1060px) {
+      .desk {
+        grid-template-columns: 1fr;
+      }
+
+      .plan-ledger {
+        position: static;
+      }
+
+      .plan-ledger dl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 24px;
+      }
+
+      .plan-ledger-head {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .decision {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-figures {
+        max-width: 460px;
+      }
+
+      .plan-table-wrap {
+        overflow-x: auto;
+      }
+
+      .plan-table {
+        min-width: 560px;
+      }
+    }
+
+    @media (max-width: 440px) {
+      .plan-ledger dl {
+        display: block;
+      }
+
+      .decision-figures {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="roofline">
+
+<header class="masthead">
+  <a class="brand" href="../../index.html"><span>DASTANZAR</span> / MLSYS</a>
+  <nav aria-label="Project navigation">
+    <a href="../../index.html">Portfolio</a>
+    <a href="https://github.com/DastanZar/roofline-planner" target="_blank" rel="noopener">Repo ↗</a>
+    <a href="https://github.com/DastanZar/roofline-planner/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Receipt ↗</a>
+  </nav>
+</header>
+
+<main class="shell">
+
+  <section class="scenario">
+    <div>
+      <div class="kicker"><span class="rule"></span><span class="label">roofline-planner / planning</span></div>
+      <h1>34 plans.<br><em>One wall.</em></h1>
+      <p class="lede">Five models against nine GPUs, evaluated at 4K context with FP16 weights. No invented peaks: each plan is a committed receipt with its VRAM stack, ridge point, and measured decode rates. The planner's own answer is that batch-1 decode is <b>always memory-bound</b> — and batch decode doesn't buy it back.</p>
+    </div>
+    <div class="brief">
+      <div class="label">The decision</div>
+      <p>Which GPU absorbs this model, how far the operating point sits from the roofline knee, and is batching worth anything?</p>
+      <div class="stamp">receipt / 34 plans</div>
+    </div>
+  </section>
+
+  <section class="desk-toolbar" aria-label="Plan selector">
+    <div class="seg toolbar-models" id="modelSeg" role="group" aria-label="Model" style="display:flex"></div>
+    <div class="toolbar-group">
+      <div class="seg" id="gpuSeg" role="group" aria-label="GPU"></div>
+      <div class="plan-sub" id="planSub">—</div>
+    </div>
+  </section>
+
+  <section class="desk">
+    <div class="stage" aria-label="Plan visuals">
+      <div class="stage-head">
+        <div class="label">Roofline sketch / log arithmetic intensity</div>
+        <div class="sub" id="roofSub">—</div>
+      </div>
+      <div class="viz-wrap">
+        <div id="roofHost"></div>
+      </div>
+      <div class="stage-head">
+        <div class="label">VRAM stack / weights + KV vs card</div>
+        <div class="sub" id="vramSub">—</div>
+      </div>
+      <div class="vram-wrap">
+        <div class="vram-stack" id="vramStack" role="img" aria-label="VRAM stack: weights, KV pool, and headroom"></div>
+        <div class="vram-cap">
+          <span>WEIGHTS <b id="capWeights">—</b> &nbsp; KV <b id="capKv">—</b></span>
+          <span>VRAM <b id="capVram">—</b> &nbsp; SPARE <b id="capSpare">—</b></span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="plan-ledger" aria-label="Plan ledger">
+      <div class="plan-ledger-head">
+        <h2>Plan ledger</h2>
+        <span id="ledgerMode">receipt</span>
+      </div>
+      <dl>
+        <div class="ledger-row2"><dt>Fits</dt><dd class="big" id="lFits">—</dd></div>
+        <div class="ledger-row2"><dt>Regime / bs=1</dt><dd class="accent" id="lRegime">—</dd></div>
+        <div class="ledger-row2"><dt>Operating point</dt><dd id="lAI">—<small>FLOP/byte at batch 1</small></dd></div>
+        <div class="ledger-row2"><dt>Roofline knee</dt><dd id="lRidge">—<small>FLOP/byte</small></dd></div>
+        <div class="ledger-row2"><dt>Decode / bs=1</dt><dd id="lTps1">—<small>tokens per second, 1 sequence</small></dd></div>
+        <div class="ledger-row2"><dt>Decode / bs=64</dt><dd id="lTps64">—<small>total tokens per second, 64 sequences</small></dd></div>
+        <div class="ledger-row2"><dt>Prefill</dt><dd id="lPrefill">—<small>per 1K tokens</small></dd></div>
+        <div class="ledger-row2"><dt>KV per token</dt><dd id="lKv">—<small>bytes, per token per layer-pair context</small></dd></div>
+      </dl>
+    </aside>
+  </section>
+
+  <section class="decision" aria-label="Plan read">
+    <div>
+      <div class="label">The plan read</div>
+      <h2 id="decisionHeadline">—</h2>
+      <p id="decisionBody">—</p>
+    </div>
+    <div class="decision-figures">
+      <div class="decision-figure accent">
+        <strong id="dGap">—</strong>
+        <span>knee sits above the operating point</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dBstar">—</strong>
+        <span>batch size where it turns compute-bound</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dHeadroom">—</strong>
+        <span>VRAM spare (derived %)</span>
+      </div>
+      <div class="decision-figure">
+        <strong id="dBatch">—</strong>
+        <span>bs=64 total vs bs=1 (derived x)</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="plan-table-wrap" aria-label="All committed plans">
+    <table class="plan-table" id="planTable">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>GPU</th>
+          <th class="num">VRAM / GB</th>
+          <th class="num">tok/s bs=1</th>
+          <th class="num">tok/s bs=64</th>
+          <th class="num">bs* knee</th>
+          <th class="muted-t">Fit</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <div class="receipt-note">
+    <span>Source <b>receipts/receipt.json</b></span>
+    <span><b>34 plans</b> / 5 models x 9 GPUs / FP16 / 4K context</span>
+    <span>Derived here: <b>knee gap</b>, <b>spare %</b>, <b>batch ratio</b></span>
+    <a href="https://github.com/DastanZar/roofline-planner/blob/main/receipts/receipt.json" target="_blank" rel="noopener">Open receipt ↗</a>
+  </div>
+</main>
+
+<footer class="footer">
+  <span>roofline-planner / deployment desk</span>
+  <span>VRAM stack, ridge point, regime, and decode rates are receipt values; knee gap, spare percent, and the batch ratio are derived ratios over those receipt fields.</span>
+</footer>
+
+<script>
+(() => {
+  const DATA = window.ROOFLINE_DATA || {};
+  const PLANS = Object.entries(DATA).map(([key, plan]) => ({ key, ...plan }));
+  const MODELS = [...new Set(PLANS.map((p) => p.model))];
+  const $ = (id) => document.getElementById(id);
+
+  const st = {
+    model: MODELS.includes("llama-3-8b") ? "llama-3-8b" : MODELS[0],
+    gpu: PLANS.find((p) => p.model === (MODELS.includes("llama-3-8b") ? "llama-3-8b" : MODELS[0])).gpu,
+  };
+
+  const fmt = (value, digits = 0) => Number(value).toLocaleString("en-US", {
+    maximumFractionDigits: digits, minimumFractionDigits: digits,
+  });
+  const plan = () => PLANS.find((p) => p.model === st.model && p.gpu === st.gpu);
+
+  // --- roofline sketch (log AI axis: 0.01 .. 10,000) ---
+  // Shape of the roofline: the slope and the knee position are receipt-derived,
+  // but the y axis carries no absolute FLOP/s numbers — the receipt does not
+  // publish peak FLOPs or bandwidth, and the desk does not invent them.
+  const R_XMIN = 0.01, R_DECADES = 6, R_LEFT = 58, R_RIGHT = 622, R_TOP = 58, R_BOTTOM = 204;
+  const xOf = (v) => R_LEFT + (Math.log10(v / R_XMIN) / R_DECADES) * (R_RIGHT - R_LEFT);
+  const DECADE_LABELS = { "0.01": "0.01", "0.1": "0.1", "1": "1", "10": "10", "100": "100", "1000": "1k", "10000": "10k" };
+
+  function roofSvg(p) {
+    const knee = p.roofline.ridge_intensity_flops_per_byte;
+    const ai = p.roofline.arithmetic_intensity_decode_b1;
+    const bstar = p.roofline.ridge_batch_b_star;
+    const plateauY = R_TOP + 8;
+    const baseY = R_BOTTOM;
+    const kneeX = xOf(knee);
+    const aiX = xOf(ai);
+    const bX = xOf(bstar);
+    const rise = baseY - plateauY;
+    const slopeYat = (x) => x <= kneeX
+      ? baseY - ((baseY - plateauY) * (x - R_LEFT) / Math.max(1, kneeX - R_LEFT))
+      : plateauY;
+
+    let ticks = "";
+    for (let d = 0; d <= R_DECADES; d += 1) {
+      const value = R_XMIN * 10 ** d;
+      const x = xOf(value);
+      const label = DECADE_LABELS[String(value)];
+      ticks += `<line x1="${x.toFixed(1)}" y1="${plateauY - 6}" x2="${x.toFixed(1)}" y2="${baseY}" stroke="#141511" stroke-opacity="0.08"/>`
+        + `<text x="${x.toFixed(1)}" y="${baseY + 16}" text-anchor="middle" class="svg-micro">${label}</text>`;
+    }
+
+    const aiY = slopeYat(aiX);
+    return `<svg viewBox="0 0 640 262" role="img" aria-label="Roofline sketch for ${p.model} on ${p.gpu}">
+      <line x1="${R_LEFT}" y1="${baseY}" x2="${R_RIGHT}" y2="${baseY}" stroke="#141511" stroke-opacity="0.4"/>
+      ${ticks}
+      <line x1="${R_LEFT}" y1="${baseY}" x2="${kneeX.toFixed(1)}" y2="${plateauY}" stroke="#141511" stroke-width="2.4"/>
+      <line x1="${kneeX.toFixed(1)}" y1="${plateauY}" x2="${R_RIGHT}" y2="${plateauY}" stroke="#E9491B" stroke-width="2.4"/>
+      <circle cx="${kneeX.toFixed(1)}" cy="${plateauY}" r="4" fill="#E9491B"/>
+      <text x="14" y="${plateauY - 10}" text-anchor="start" class="svg-micro" transform="rotate(0)">ACHIEVABLE FLOP/S (SHAPE ONLY)</text>
+      <text x="${kneeX.toFixed(1)}" y="${plateauY - 14}" text-anchor="${kneeX > 480 ? "end" : "middle"}" class="svg-label svg-accent">KNEE ${knee.toFixed(1)} FLOP/B</text>
+      <line x1="${aiX.toFixed(1)}" y1="${aiY}" x2="${aiX.toFixed(1)}" y2="${baseY}" stroke="#141511" stroke-dasharray="2 3" stroke-opacity="0.7"/>
+      <circle cx="${aiX.toFixed(1)}" cy="${aiY.toFixed(1)}" r="4.6" fill="#141511"/>
+      <text x="${aiX.toFixed(1)}" y="${baseY + 30}" text-anchor="middle" class="svg-label svg-ink">PLAN b=1 / ${ai.toFixed(3)}</text>
+      <line x1="${bX.toFixed(1)}" y1="${R_TOP + 26}" x2="${bX.toFixed(1)}" y2="${baseY}" stroke="#E9491B" stroke-dasharray="3 4" stroke-opacity="0.6"/>
+      <circle cx="${bX.toFixed(1)}" cy="${plateauY}" r="3.8" fill="none" stroke="#E9491B" stroke-width="1.8"/>
+      <text x="${bX.toFixed(1)}" y="${R_TOP + 16}" text-anchor="${bX > 470 ? "end" : "start"}" class="svg-label svg-accent">b=${fmt(bstar)} COMPUTE KNEE</text>
+      <text x="${R_RIGHT}" y="${baseY + 48}" text-anchor="end" class="svg-label">ARITHMETIC INTENSITY / FLOP PER BYTE (LOG)</text>
+    </svg>`;
+  }
+
+  function vramDom(p) {
+    const v = p.vram;
+    const stack = $("vramStack");
+    stack.setAttribute("aria-label",
+      `${v.weights_gb} GB weights, ${v.kv_gb} GB KV, ${fmt(v.headroom_gb, 1)} GB spare of ${v.vram_gb} GB`);
+    const wPct = (v.weights_gb / v.vram_gb) * 100;
+    const kPct = (v.kv_gb / v.vram_gb) * 100;
+    const iPct = Math.max(0, (v.headroom_gb / v.vram_gb) * 100);
+    stack.innerHTML = `<div class="seg-weights" style="width:${wPct.toFixed(2)}%" title="weights ${v.weights_gb} GB"></div>`
+      + `<div class="seg-kv" style="width:${kPct.toFixed(2)}%" title="KV pool ${v.kv_gb} GB"></div>`
+      + `<div class="seg-idle" style="width:${iPct.toFixed(2)}%" title="headroom ${fmt(v.headroom_gb, 1)} GB"></div>`;
+    $("capWeights").textContent = `${v.weights_gb.toFixed(2)} GB`;
+    $("capKv").textContent = `${v.kv_gb.toFixed(2)} GB`;
+    $("capVram").textContent = `${v.vram_gb} GB`;
+    $("capSpare").textContent = `${v.headroom_gb.toFixed(1)} GB`;
+  }
+
+  function renderSelects() {
+    const modelSeg = $("modelSeg");
+    modelSeg.innerHTML = "";
+    MODELS.forEach((model) => {
+      const count = PLANS.filter((p) => p.model === model).length;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = `${model}`;
+      b.title = `${count} committed plan${count === 1 ? "" : "s"}`;
+      b.dataset.model = model;
+      b.setAttribute("aria-pressed", String(model === st.model));
+      b.addEventListener("click", () => {
+        st.model = model;
+        st.gpu = PLANS.find((p) => p.model === model).gpu;
+        render();
+      });
+      modelSeg.appendChild(b);
+    });
+
+    const gpuSeg = $("gpuSeg");
+    gpuSeg.innerHTML = "";
+    PLANS.filter((p) => p.model === st.model).forEach((p) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = p.gpu;
+      b.dataset.gpu = p.gpu;
+      b.setAttribute("aria-pressed", String(p.gpu === st.gpu));
+      b.addEventListener("click", () => { st.gpu = p.gpu; render(); });
+      gpuSeg.appendChild(b);
+    });
+  }
+
+  function renderLedger(p) {
+    const v = p.vram;
+    const r = p.roofline;
+    const gap = r.ridge_intensity_flops_per_byte / r.arithmetic_intensity_decode_b1;
+    $("lFits").innerHTML = v.fits
+      ? `Yes<small>${v.weights_gb.toFixed(2)} + ${v.kv_gb.toFixed(2)} of ${v.vram_gb} GB</small>` : "No";
+    $("lRegime").textContent = r.regime.replace(/-/g, " ");
+    $("lAI").innerHTML = `${r.arithmetic_intensity_decode_b1.toFixed(3)}<small>FLOP/byte at batch 1</small>`;
+    $("lRidge").innerHTML = `${r.ridge_intensity_flops_per_byte.toFixed(1)}<small>FLOP/byte (${fmt(r.weight_gqa, 0)}x GQA weight)</small>`;
+    $("lTps1").innerHTML = `${p.decode.tokens_per_sec_b1.toFixed(1)}<small>tokens per second, 1 sequence</small>`;
+    $("lTps64").innerHTML = `${p.decode.tokens_per_sec_b64_total.toFixed(1)}<small>${(p.decode.tokens_per_sec_b64_total / p.decode.tokens_per_sec_b1).toFixed(2)}x the bs=1 rate (derived)</small>`;
+    $("lPrefill").innerHTML = `${p.prefill.ms_per_1k_tokens.toFixed(1)} ms<small>8K: ${p.prefill.ms_per_8k_tokens.toFixed(0)} ms</small>`;
+    $("lKv").innerHTML = `${fmt(p.kv_bytes_per_token / 1024)} KiB<small>per token · ${fmt(p.context)} ctx · KV ${p.kv_bits}-bit</small>`;
+  }
+
+  function renderDecision(p) {
+    const r = p.roofline;
+    const v = p.vram;
+    const gap = r.ridge_intensity_flops_per_byte / r.arithmetic_intensity_decode_b1;
+    const ratio = p.decode.tokens_per_sec_b64_total / p.decode.tokens_per_sec_b1;
+    $("dGap").textContent = `${fmt(Math.round(gap))}x`;
+    $("dBstar").textContent = `b=${fmt(r.ridge_batch_b_star)}`;
+    $("dHeadroom").textContent = `${fmt(Math.round(v.headroom_gb / v.vram_gb * 100))}%`;
+    $("dBatch").textContent = `${ratio.toFixed(2)}x`;
+
+    $("decisionHeadline").innerHTML = v.fits
+      ? `Fits with ${v.headroom_gb.toFixed(1)} GB spare — and it still rides the <em>memory wall.</em>`
+      : `Does not <em>fit.</em>`;
+    $("decisionBody").textContent = v.fits
+      ? `At batch 1 the plan runs ${r.arithmetic_intensity_decode_b1.toFixed(3)} FLOP/byte against a ${r.ridge_intensity_flops_per_byte.toFixed(0)} FLOP/byte knee — ${fmt(Math.round(gap))}x short of compute-bound, which only arrives near batch ${fmt(r.ridge_batch_b_star)}. The receipt also answers the batching question: ${fmt(64)} sequences return ${ratio.toFixed(2)}x the bs=1 token rate, so VRAM is the buying decision, not FLOPs.`
+      : `Weights and the ${fmt(p.context)}-token KV pool exceed the card. Nothing in the committed plan set harms this — the desk instead shows which GPU was required.`;
+  }
+
+  function renderTable() {
+    const tbody = document.querySelector("#planTable tbody");
+    tbody.innerHTML = "";
+    PLANS.forEach((p) => {
+      const selected = p.model === st.model && p.gpu === st.gpu;
+      const tr = document.createElement("tr");
+      tr.tabIndex = 0;
+      tr.setAttribute("aria-selected", String(selected));
+      tr.innerHTML = `<td>${p.model}</td>`
+        + `<td>${p.gpu}</td>`
+        + `<td class="num">${vramText(p)}</td>`
+        + `<td class="num">${p.decode.tokens_per_sec_b1.toFixed(1)}</td>`
+        + `<td class="num">${p.decode.tokens_per_sec_b64_total.toFixed(1)}</td>`
+        + `<td class="num">${fmt(p.roofline.ridge_batch_b_star)}</td>`
+        + `<td><span class="fit-dot" title="fits from receipt"></span>yes</td>`;
+      const pick = () => { st.model = p.model; st.gpu = p.gpu; render(); };
+      tr.addEventListener("click", pick);
+      tr.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+      tbody.appendChild(tr);
+    });
+  }
+
+  const vramText = (p) => `${p.vram.vram_gb}`;
+
+  function render() {
+    const p = plan();
+    $("planSub").innerHTML = `<b>${p.model} / ${p.gpu}</b><br>FP16 weights · ${fmt(p.context)} ctx`;
+    $("roofSub").textContent = `${p.model} / ${p.gpu}`;
+    $("vramSub").textContent = `${p.vram.vram_gb} GB CARD`;
+    $("roofHost").innerHTML = roofSvg(p);
+    vramDom(p);
+    renderLedger(p);
+    renderDecision(p);
+    renderTable();
+    renderSelects();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

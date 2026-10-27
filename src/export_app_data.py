@@ -31,6 +31,7 @@ def main() -> None:
     write("sdecode", "SDECODE_DATA", load("sdecode_real_run"))
     write("pagemem", "PAGEMEM_DATA", load("pagemem"))
     write("cplan", "CPLAN_DATA", load("cplan"))
+    write("roofline-planner", "ROOFLINE_DATA", load("roofline-planner"))
 
 
 if __name__ == "__main__":
