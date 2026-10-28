@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light" data-accent="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -24,12 +24,24 @@
 <meta name="twitter:image" content="https://dastanzar.github.io/og.png">
 <meta name="twitter:image:alt" content="Abhinav Chauhan — I make inference cheaper. And I show the receipts.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="motion.css">
-<script>document.documentElement.classList.add('js');</script>
+<script>
+document.documentElement.classList.add('js');
+/* Apply a saved theme before first paint so there is no flash of paper. */
+try {
+  var saved = JSON.parse(localStorage.getItem('mlsys.theme.v1') || '{}');
+  if (saved.theme) document.documentElement.setAttribute('data-theme', saved.theme);
+  if (saved.accent) document.documentElement.setAttribute('data-accent', saved.accent);
+} catch (error) {}
+</script>
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body>
@@ -69,6 +81,22 @@
     </nav>
     <div class="mast-right">
       <span class="status"><i aria-hidden="true"></i>Open to MLSys roles</span>
+      <div class="theme" data-theme-widget>
+        <button class="theme-btn" type="button" data-theme-toggle aria-expanded="false" aria-controls="themePanel" aria-label="Change the colour theme">
+          <span class="theme-dot" aria-hidden="true"></span>
+          <span class="theme-btn-label">Theme</span>
+        </button>
+        <div class="theme-panel" id="themePanel" data-theme-panel hidden>
+          <div class="theme-group">
+            <span class="theme-group-title">Surface</span>
+            <div class="theme-grid" data-theme-bases role="group" aria-label="Surface theme"></div>
+          </div>
+          <div class="theme-group">
+            <span class="theme-group-title">Signal</span>
+            <div class="theme-grid is-accents" data-theme-accents role="group" aria-label="Signal colour"></div>
+          </div>
+        </div>
+      </div>
       <a class="github-link" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
     </div>
   </div>
@@ -81,7 +109,7 @@
       <div class="hero-grid">
         <div class="hero-main">
           <div class="kicker"><span class="kicker-dot" aria-hidden="true"></span><span>Portfolio / Vol. 01</span><span class="kicker-sep" aria-hidden="true">—</span><span>2026</span></div>
-          <h1>
+          <h1 data-tw>
             <span class="line"><span>I make inference</span></span>
             <span class="line"><span><em>cheaper.</em></span></span>
             <span class="h1-tail">And I show the receipts.</span>
@@ -312,7 +340,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <div class="section-index">01 / WORK</div>
-        <h2 class="section-title" data-split>Selected <em>systems</em></h2>
+        <h2 class="section-title" data-tw>Selected <em>systems</em></h2>
         <p class="section-note">Ten case files from the public inventory. Every claim links back to the repo and the receipt that proves it.</p>
       </div>
       <article class="case case-featured reveal" id="sdecode" data-ink-point data-ink-say="sdecode. the target-call ledger.">
@@ -476,7 +504,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <div class="section-index">02 / INVENTORY</div>
-        <h2 class="section-title" data-split>Twenty repos. <em>Five layers.</em></h2>
+        <h2 class="section-title" data-tw>Twenty repos. <em>Five layers.</em></h2>
         <p class="section-note">The ten case files above are the deep cuts. This is the complete public inventory, grouped by the inference layer each repo works on. One receipt-backed metric per card.</p>
       </div>
       <div class="inventory-meta reveal" aria-label="Inventory summary">
@@ -807,7 +835,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <div class="section-index">— / THE LOSSES</div>
-        <h2 class="section-title" data-split>What didn't <em>work.</em></h2>
+        <h2 class="section-title" data-tw>What didn't <em>work.</em></h2>
         <p class="section-note">Six experiments that regressed, published on purpose. A receipt you can trust is one that also shows the misses.</p>
       </div>
       <div class="loss-grid"><article class="loss-card reveal" data-ink-point data-ink-say="treetrace. we publish the loss too.">
@@ -871,7 +899,7 @@
     <div class="wrap">
       <div class="section-head section-head-dark reveal">
         <div class="section-index">03 / RECEIPTS</div>
-        <h2 class="section-title serif-title" data-split>The receipt is the <em>résumé.</em></h2>
+        <h2 class="section-title serif-title" data-tw>The receipt is the <em>résumé.</em></h2>
         <p class="section-note">Not a screenshot of a benchmark. The committed JSON that generated every number on this page.</p>
       </div>
       <div class="receipt-grid">
@@ -903,7 +931,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <div class="section-index">04 / METHOD</div>
-        <h2 class="section-title" data-split>Method, not <em>magic.</em></h2>
+        <h2 class="section-title" data-tw>Method, not <em>magic.</em></h2>
         <p class="section-note">The same contract in every repo, so the numbers can be compared instead of admired.</p>
       </div>
       <div class="method-quote reveal" data-split>“A benchmark is an argument. <em>A receipt is evidence.</em>”</div>
@@ -938,7 +966,7 @@
     <div class="wrap about-grid">
       <div class="about-intro reveal">
         <div class="section-index">05 / ABOUT</div>
-        <h2 data-split>Systems engineer.<br><em>Allergic to hand-waving.</em></h2>
+        <h2 data-tw>Systems engineer.<br><em>Allergic to hand-waving.</em></h2>
         <div class="about-mark" aria-hidden="true">AC<span>/</span>26</div>
       </div>
       <div class="about-copy reveal">
@@ -961,7 +989,7 @@
 <section class="outro">
   <div class="wrap">
     <div class="outro-top"><span class="section-index">06 / NEXT</span><span class="outro-year">PORTFOLIO / 2026</span></div>
-    <h2 data-split>Have a system that needs to get <em>cheaper?</em></h2>
+    <h2 data-tw>Have a system that needs to get <em>cheaper?</em></h2>
     <div class="outro-row">
       <p>I'm open to MLSys and inference engineering roles. Start with the receipts — then bring me the p99.</p>
       <a class="btn btn-light" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>

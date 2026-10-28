@@ -89,6 +89,241 @@
   splitWords();
 
   // -----------------------------------------------------------------------
+  // Typewriter headings (Doto). Characters stay in the document and only
+  // their opacity animates, so nothing reflows while it types and the
+  // heading still reads correctly without JavaScript.
+  // -----------------------------------------------------------------------
+  const twElements = $$("[data-tw]");
+
+  if (twElements.length && !staticMode) {
+    const twSplit = (element) => {
+      const chars = [];
+      const walk = (node) => {
+        [...node.childNodes].forEach((child) => {
+          if (child.nodeType === Node.TEXT_NODE) {
+            const text = child.textContent;
+            if (!text) return;
+            const fragment = document.createDocumentFragment();
+            for (const character of text) {
+              if (/\s/.test(character)) {
+                fragment.appendChild(document.createTextNode(character));
+                continue;
+              }
+              const span = document.createElement("span");
+              span.className = "tw-c";
+              span.textContent = character;
+              fragment.appendChild(span);
+              chars.push(span);
+            }
+            child.replaceWith(fragment);
+            return;
+          }
+          if (child.nodeType === Node.ELEMENT_NODE && child.tagName !== "BR") walk(child);
+        });
+      };
+      walk(element);
+      return chars;
+    };
+
+    const twState = twElements.map((element) => {
+      const label = element.textContent.replace(/\s+/g, " ").trim();
+      const chars = twSplit(element);
+      if (chars.length) element.setAttribute("aria-label", label);
+      return { element, chars, timer: 0, once: Boolean(element.closest(".hero")), done: false };
+    });
+
+    root.classList.add("tw");
+
+    const twType = (state) => {
+      const { chars } = state;
+      if (!chars.length) return;
+      window.clearTimeout(state.timer);
+      chars.forEach((char) => char.classList.remove("is-on", "is-cursor"));
+      // keep every heading between roughly 0.9s and 1.6s, long or short
+      const per = Math.max(16, Math.min(52, Math.round(1300 / chars.length)));
+      let index = 0;
+      const step = () => {
+        if (index > 0) chars[index - 1].classList.remove("is-cursor");
+        if (index >= chars.length) return;
+        chars[index].classList.add("is-on", "is-cursor");
+        index += 1;
+        state.timer = window.setTimeout(step, per);
+      };
+      step();
+    };
+
+    const twClear = (state) => {
+      window.clearTimeout(state.timer);
+      state.chars.forEach((char) => char.classList.remove("is-on", "is-cursor"));
+    };
+
+    if ("IntersectionObserver" in window) {
+      const twObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const state = twState.find((item) => item.element === entry.target);
+            if (!state) return;
+            if (entry.isIntersecting) {
+              if (state.done) return;
+              twType(state);
+              if (state.once) {
+                state.done = true;
+                twObserver.unobserve(entry.target);
+              }
+            } else if (!state.once) {
+              twClear(state);
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+
+      twState.forEach((state) => {
+        if (state.once) {
+          const rect = state.element.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            twType(state);
+            state.done = true;
+            return;
+          }
+        }
+        twObserver.observe(state.element);
+      });
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // Theme switcher: surface + signal, remembered per browser.
+  // -----------------------------------------------------------------------
+  const THEMES = [
+    ["light", "Light", "#f2efe5", "#141511"],
+    ["espresso", "Espresso", "#1a1512", "#f3ece1"],
+    ["graphite", "Graphite", "#201f1a", "#f4f1e8"],
+    ["forest", "Forest", "#101710", "#e9f0e4"],
+    ["navy", "Navy", "#0f1520", "#e8eef7"],
+    ["plum", "Plum", "#17121b", "#efe8f2"],
+    ["slate", "Slate", "#17191c", "#eceef0"],
+    ["night", "Night", "#000000", "#ffffff"],
+    ["olive", "Olive", "#191a12", "#f0efe0"],
+    ["amber", "Amber", "#0b0b09", "#ded9c6"],
+  ];
+  const ACCENTS = [
+    ["auto", "Auto", null],
+    ["signal", "Signal", "#e9491b"],
+    ["coral", "Coral", "#ff6a3d"],
+    ["amber", "Amber", "#ffb000"],
+    ["lime", "Lime", "#b6e05a"],
+    ["cyan", "Cyan", "#5ad1e0"],
+    ["magenta", "Magenta", "#ff5f9e"],
+    ["sage", "Sage", "#aab6a0"],
+    ["red", "Red", "#ff4d4d"],
+  ];
+
+  const themeToggle = $("[data-theme-toggle]");
+  const themePanel = $("[data-theme-panel]");
+  const baseHost = $("[data-theme-bases]");
+  const accentHost = $("[data-theme-accents]");
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+  if (themeToggle && themePanel && baseHost && accentHost) {
+    const prefs = {
+      theme: root.getAttribute("data-theme") || "light",
+      accent: root.getAttribute("data-accent") || "auto",
+    };
+    const baseSwatches = new Map();
+    const accentSwatches = new Map();
+    const themeGround = (id) => (THEMES.find((t) => t[0] === id) || THEMES[0])[2];
+
+    const syncPressed = () => {
+      baseSwatches.forEach((button, id) => {
+        button.setAttribute("aria-pressed", String(prefs.theme === id));
+        button.classList.toggle("is-on", prefs.theme === id);
+      });
+      accentSwatches.forEach((button, id) => {
+        button.setAttribute("aria-pressed", String(prefs.accent === id));
+        button.classList.toggle("is-on", prefs.accent === id);
+      });
+    };
+
+    const apply = () => {
+      root.setAttribute("data-theme", prefs.theme);
+      root.setAttribute("data-accent", prefs.accent);
+      if (themeMeta) themeMeta.setAttribute("content", themeGround(prefs.theme));
+      syncPressed();
+      try {
+        localStorage.setItem("mlsys.theme.v1", JSON.stringify(prefs));
+      } catch (error) {}
+    };
+
+    THEMES.forEach(([id, name, bg, ink]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "theme-swatch";
+      button.setAttribute("aria-pressed", "false");
+      const chip = document.createElement("span");
+      chip.className = "theme-chip";
+      chip.style.background = bg;
+      chip.style.boxShadow = `inset 0 0 0 1px ${ink}`;
+      const text = document.createElement("span");
+      text.textContent = name;
+      button.append(chip, text);
+      button.addEventListener("click", () => {
+        prefs.theme = id;
+        apply();
+      });
+      baseSwatches.set(id, button);
+      baseHost.appendChild(button);
+    });
+
+    ACCENTS.forEach(([id, name, value]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "theme-swatch is-accents";
+      button.setAttribute("aria-pressed", "false");
+      button.title = id === "auto" ? "Use the surface's own signal colour" : name;
+      button.setAttribute("aria-label", name);
+      const chip = document.createElement("span");
+      chip.className = "theme-chip";
+      chip.style.background =
+        id === "auto"
+          ? "conic-gradient(from 30deg, #e9491b, #ffb000, #b6e05a, #5ad1e0, #ff5f9e, #e9491b)"
+          : value;
+      button.appendChild(chip);
+      button.addEventListener("click", () => {
+        prefs.accent = id;
+        apply();
+      });
+      accentSwatches.set(id, button);
+      accentHost.appendChild(button);
+    });
+
+    const closePanel = () => {
+      themePanel.hidden = true;
+      themeToggle.setAttribute("aria-expanded", "false");
+    };
+
+    themeToggle.addEventListener("click", () => {
+      const opening = themePanel.hidden;
+      themePanel.hidden = !opening;
+      themeToggle.setAttribute("aria-expanded", String(opening));
+    });
+
+    document.addEventListener("click", (event) => {
+      if (themePanel.hidden) return;
+      if (!event.target.closest("[data-theme-widget]")) closePanel();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !themePanel.hidden) {
+        closePanel();
+        themeToggle.focus();
+      }
+    });
+
+    syncPressed();
+  }
+
+  // -----------------------------------------------------------------------
   // Reveals + section rules + chart print
   // -----------------------------------------------------------------------
   const revealElements = $$(".reveal");

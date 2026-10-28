@@ -990,6 +990,8 @@ shutil.copyfile(SRC / "styles.css", ROOT / "styles.css")
 shutil.copyfile(SRC / "motion.css", ROOT / "motion.css")
 shutil.copyfile(SRC / "app.js", ROOT / "app.js")
 shutil.copyfile(SRC / "favicon.svg", ROOT / "favicon.svg")
+# Raster icon fallbacks (favicon.ico, favicon-16/32.png, apple-touch-icon.png)
+# are generated once by src/make_icons.py and read straight from the repo root.
 shutil.copyfile(SRC / "mascot.svg", ROOT / "assets" / "ink-mascot.svg")
 
 print("built index.html")

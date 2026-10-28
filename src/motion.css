@@ -149,7 +149,7 @@
   position: absolute;
   inset: 30px 8px 92px;
   z-index: -1;
-  background-image: radial-gradient(rgba(20, 21, 17, 0.19) 0.65px, transparent 0.8px);
+  background-image: radial-gradient(var(--ink-a19) 0.65px, transparent 0.8px);
   background-size: 5px 5px;
   mask-image: radial-gradient(ellipse at 60% 62%, #000 0 36%, transparent 72%);
   opacity: 0.42;
@@ -223,7 +223,7 @@
   gap: 2px;
   padding: 5px 7px 6px;
   border: 1.5px solid var(--accent-dark);
-  box-shadow: inset 0 0 0 2px var(--paper-2), inset 0 0 0 3px rgba(200, 58, 17, 0.35);
+  box-shadow: inset 0 0 0 2px var(--paper-2), inset 0 0 0 3px var(--accent-dark-glow);
   color: var(--accent-dark);
   font: 6px/1.05 var(--mono);
   letter-spacing: 0.11em;
@@ -307,7 +307,7 @@
   left: 17%;
   height: 8px;
   border-radius: 50%;
-  background: rgba(20, 21, 17, 0.1);
+  background: var(--shadow-1);
   filter: blur(4px);
   transform: scaleX(0.72);
   transition: transform 0.4s var(--ease-out), opacity 0.4s;
@@ -320,7 +320,7 @@
   height: auto;
   overflow: visible;
   color: var(--ink);
-  filter: drop-shadow(0 8px 0 rgba(20, 21, 17, 0.03));
+  filter: drop-shadow(0 8px 0 var(--ink-a3));
   transform-origin: 50% 100%;
 }
 
@@ -1060,7 +1060,7 @@
 }
 
 .ink-tricks button:hover span {
-  color: #ff7c55;
+  color: var(--band-accent);
 }
 
 .aside-stamp {
@@ -1069,7 +1069,7 @@
   flex: 0 0 auto;
   margin: -15px 0 0 14px;
   background: var(--paper);
-  box-shadow: 0 0 0 1px rgba(242, 239, 229, 0.6);
+  box-shadow: 0 0 0 1px var(--paper-a60);
   font-size: 5.4px;
   pointer-events: none;
 }
@@ -1280,8 +1280,8 @@
   z-index: 0;
   background: radial-gradient(
     260px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(233, 73, 27, 0.11),
-    rgba(233, 73, 27, 0.035) 30%,
+    var(--accent-glow-3),
+    var(--accent-glow-4) 30%,
     transparent 66%
   );
   opacity: 0;
@@ -1394,7 +1394,7 @@
   position: absolute;
   inset: 0;
   z-index: 4;
-  background: linear-gradient(to bottom, transparent 0%, rgba(255, 124, 85, 0.09) 48%, transparent 52%);
+  background: linear-gradient(to bottom, transparent 0%, var(--band-accent-glow) 48%, transparent 52%);
   opacity: 0;
   pointer-events: none;
   transform: translateY(-100%);
@@ -1846,4 +1846,58 @@
 
 .static .reg-cursor {
   display: none !important;
+}
+
+
+/* ==========================================================================
+   Typewriter headings (Doto)
+
+   Characters stay in the document, so the heading still reads correctly with
+   no JS and stays selected/copyable; only opacity is animated. The cursor is
+   an absolutely positioned ::after on the current character, so it never
+   contributes layout and the line never jitters.
+   -------------------------------------------------------------------------- */
+.tw .tw-c {
+  opacity: 0;
+}
+
+.tw .tw-c.is-on {
+  opacity: 1;
+}
+
+.tw-c.is-cursor {
+  position: relative;
+}
+
+.tw-c.is-cursor::after {
+  content: "";
+  position: absolute;
+  top: 0.08em;
+  left: 100%;
+  width: 0.42ch;
+  height: 0.82em;
+  margin-left: 0.05em;
+  background: var(--accent);
+  animation: tw-blink 1.05s steps(1, end) infinite;
+}
+
+@keyframes tw-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.static .tw .tw-c,
+.reduce-motion .tw .tw-c {
+  opacity: 1 !important;
+}
+
+.static .tw-c.is-cursor::after,
+.reduce-motion .tw-c.is-cursor::after {
+  display: none;
 }

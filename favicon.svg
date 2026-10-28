@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Abhinav Chauhan">
+  <!-- Path-drawn monogram: no <text>, so every browser rasterises it in the tab. -->
   <rect width="64" height="64" fill="#141511"/>
-  <text x="10" y="41" fill="#F2EFE5" font-family="'JetBrains Mono', Consolas, monospace" font-size="22" font-weight="600" letter-spacing="-1">AC</text>
-  <rect x="10" y="48" width="28" height="3" fill="#E9491B"/>
+  <g fill="none" stroke="#f2efe5" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 46 L18 18 L27 46"/>
+    <path d="M13 36.5 H23"/>
+    <circle cx="44" cy="32" r="11.5"/>
+  </g>
+  <rect x="43" y="24" width="16" height="16" fill="#141511"/>
+  <rect x="43" y="53" width="14" height="3.5" fill="#e9491b"/>
 </svg>
