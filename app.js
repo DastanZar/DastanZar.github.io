@@ -22,16 +22,40 @@
   // -----------------------------------------------------------------------
   const progress = $(".progress i");
   const masthead = $(".masthead");
+  const asideStamp = $(".aside-stamp");
   let scrollQueued = false;
+  let scrollMax = 0;
+  let mastheadScrolled = null;
+
+  // Measured once and refreshed on real size changes, never read per frame:
+  // reading scrollHeight after writing style forces a synchronous re-layout.
+  const measureScroll = () => {
+    scrollMax = Math.max(0, root.scrollHeight - window.innerHeight);
+  };
 
   const updateScrollUI = () => {
-    const max = root.scrollHeight - window.innerHeight;
-    const raw = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-    if (progress) progress.style.width = `${raw * 100}%`;
-    root.style.setProperty("--scroll-rot", `${raw * 12}deg`);
-    if (masthead) masthead.classList.toggle("is-scrolled", window.scrollY > 8);
     scrollQueued = false;
+    const raw = scrollMax > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollMax)) : 0;
+    if (progress) progress.style.width = `${raw * 100}%`;
+    // Scoped to the one element that consumes it. Set on :root this was an
+    // inherited custom property, so every frame invalidated style for the whole
+    // document — the single largest cost of scrolling the page.
+    if (asideStamp) asideStamp.style.setProperty("--scroll-rot", `${(raw * 12).toFixed(2)}deg`);
+    const scrolled = window.scrollY > 8;
+    if (masthead && scrolled !== mastheadScrolled) {
+      mastheadScrolled = scrolled;
+      masthead.classList.toggle("is-scrolled", scrolled);
+    }
   };
+
+  measureScroll();
+  updateScrollUI();
+
+  const remeasure = () => measureScroll();
+  if ("ResizeObserver" in window) new ResizeObserver(remeasure).observe(document.body);
+  window.addEventListener("resize", remeasure, { passive: true });
+  window.addEventListener("load", remeasure, { once: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
 
   window.addEventListener(
     "scroll",
@@ -43,7 +67,6 @@
     },
     { passive: true }
   );
-  updateScrollUI();
 
   // -----------------------------------------------------------------------
   // Split display type into tracks. Word-level, not opacity stacks.
