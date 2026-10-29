@@ -117,7 +117,8 @@ try {
           <div class="hero-bottom">
             <p class="lede">I build and measure the systems layer of ML: <strong>quantization, KV memory, batch scheduling, and speculative decoding.</strong> Ten case files from a twenty-repo public inventory. Real CPU receipts. GPU figures are labelled models, never borrowed numbers.</p>
             <div class="hero-actions">
-              <a class="btn btn-ink" href="#work">Selected systems <span aria-hidden="true">↓</span></a>
+              <a class="btn btn-ink" href="app/sdecode/index.html" target="_blank" rel="noopener">Try sdecode live <span aria-hidden="true">↗</span></a>
+              <a class="btn btn-ghost" href="#work">Selected systems <span aria-hidden="true">↓</span></a>
               <a class="btn btn-ghost" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
             </div>
             <p class="hero-nogpu"><span class="hero-nogpu-dot" aria-hidden="true"></span>Every number on this page ran on a CPU. No GPU needed to check any of it.</p>
@@ -359,6 +360,8 @@ try {
       <div class="spec"><dt>ARTIFACTS</dt><dd>app · film · ledger</dd></div>
     </dl>
     <p class="case-note"><span class="note-mark"></span> Negative result included: adaptive K averaged 4.16× on this pair; both lanes stay in the receipt.</p>
+    <p class="case-decision"><b>Decision</b><span>Fixed K at 8 instead of scheduling K adaptively. The adaptive lane averaged 4.16× against 5.69×, so the simpler lane won. Cost: one K to pick per drafter/target pair.</span></p>
+    <p class="case-reflect"><b>Next time</b><span>Scope the adaptive-K sweep before locking the fixed-K ladder. The adaptive lane regressed (4.16×), so effort went into the lane that lost — better to rule that out on day one.</span></p>
     <div class="case-links">
       <a class="btn btn-ink" href="https://github.com/DastanZar/sdecode" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
       <a class="btn btn-ghost" href="app/sdecode/index.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
@@ -406,6 +409,7 @@ try {
   <p class="case-claim"><strong>59.5% fewer blocks</strong></p>
   <p class="case-so">The same card holds about 2.5&thinsp;&times;&thinsp;more conversations.</p>
   <p class="case-desc">The allocator shares a 512-token system prefix and pages the rest. The 504-block preallocated baseline becomes 204 blocks, with the block map committed next to the numbers.</p>
+  <p class="case-decision"><b>Decision</b><span>Paged the KV and shared one 512-token prefix instead of preallocating per sequence — 59.5% fewer blocks. Cost: a block map to maintain and commit alongside the numbers.</span></p>
   <div class="case-links">
     <a class="text-link strong" href="https://github.com/DastanZar/pagemem" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
     <a class="text-link" href="https://github.com/DastanZar/pagemem/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
@@ -434,6 +438,7 @@ try {
   <p class="case-claim"><strong>94% lower TTFT</strong></p>
   <p class="case-so">The wait for the first word falls by 94%.</p>
   <p class="case-desc">A continuous scheduler lets every slot refill the moment it frees. Static batching waits for the longest job. The receipt records TTFT and p99 at four request rates.</p>
+  <p class="case-decision"><b>Decision</b><span>Continuous batching over a static schedule: slots refill the moment they free and TTFT falls 94% at 1.5 req/s. Cost: per-step scheduling, and a p99 you now have to watch.</span></p>
   <div class="case-links">
     <a class="text-link strong" href="https://github.com/DastanZar/cplan" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
     <a class="text-link" href="https://github.com/DastanZar/cplan/blob/main/receipts/receipt.json" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
@@ -899,7 +904,7 @@ try {
     <div class="wrap">
       <div class="section-head section-head-dark reveal">
         <div class="section-index">03 / RECEIPTS</div>
-        <h2 class="section-title serif-title" data-tw>The receipt is the <em>résumé.</em></h2>
+        <h2 class="section-title title-band" data-tw>The receipt is the <em>résumé.</em></h2>
         <p class="section-note">Not a screenshot of a benchmark. The committed JSON that generated every number on this page.</p>
       </div>
       <div class="receipt-grid">
@@ -971,6 +976,7 @@ try {
       </div>
       <div class="about-copy reveal">
         <p class="about-lede">I'm Abhinav Chauhan. I work on the unglamorous layer between a model and its bill.</p>
+        <p class="about-role"><b>Solo, end to end</b><span>Problem, implementation, harness, tests, and the receipt that ships with them.</span></p>
         <p>Caches, kernels, schedulers, and decoding loops. I like small, complete projects with sharp claims and honest measurements — the kind of work that survives a p99, a tight GPU budget, and a reviewer who asks where the number came from.</p>
         <p>Twenty public repos; ten deep case files and a 20-card index on this page. Each case file is built around one inference problem and one committed receipt. The index keeps the rest of the inventory inspectable by layer, not by chronology.</p>
         <div class="focus" aria-label="Focus areas">
@@ -981,6 +987,34 @@ try {
           <a class="btn btn-ink" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
           <a class="text-link" href="https://github.com/DastanZar?tab=repositories" target="_blank" rel="noopener">All repositories <span aria-hidden="true">↗</span></a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section faq" id="faq">
+    <div class="wrap faq-list">
+      <div class="section-index">— / QUESTIONS</div>
+      <div class="faq-items">
+        <details class="faq-item">
+          <summary>Is this real work, or a portfolio of screenshots?</summary>
+          <p>Neither. Every number on this page is read from a committed JSON file at build time, and the console in the receipts section is that file, not a picture of one. If a number is not in <code>receipts/</code>, it is not on the page.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I check any of it myself?</summary>
+          <p>Yes. Everything here ran on a CPU. Clone a repo, run the harness, and compare against the committed receipt — no GPU is needed to reproduce a single claim on this page.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why twenty repos and only ten case files?</summary>
+          <p>Ten are the deep cuts: one problem and one receipt each. The twenty-card index covers the full public inventory, grouped by the inference layer each repo works on, with one measured metric per card.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Are the GPU numbers real?</summary>
+          <p>They are labelled models, not measurements. Where a figure needed a GPU, it is shown with its assumptions attached, and the method section says so. Measured means CPU-measured.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What happens when a receipt is wrong?</summary>
+          <p>Tests assert the metric next to the number, and the build fails when a receipt drifts. The experiments that regressed are published too — that is the losses section. A receipt worth trusting is one that shows the misses as well.</p>
+        </details>
       </div>
     </div>
   </section>

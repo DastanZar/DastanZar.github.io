@@ -750,6 +750,41 @@ def hero_facts() -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# Judgment lines
+#
+# The claim and the negative result were already here; these add the one thing
+# a reviewer actually audits for: which way the call went, what it cost, and —
+# on the featured case — what would be done differently. Every number is
+# interpolated from the same receipts as the rest of the page.
+# ---------------------------------------------------------------------------
+decisions = {
+    "sdecode": (
+        f"Fixed K at 8 instead of scheduling K adaptively. The adaptive lane "
+        f"averaged {fmt(sd_adaptive)}× against {fmt(sd_tpc)}×, so the simpler "
+        f"lane won. Cost: one K to pick per drafter/target pair."
+    ),
+    "pagemem": (
+        f"Paged the KV and shared one 512-token prefix instead of preallocating "
+        f"per sequence — {pm_saved} fewer blocks. Cost: a block map to maintain "
+        f"and commit alongside the numbers."
+    ),
+    "cplan": (
+        f"Continuous batching over a static schedule: slots refill the moment "
+        f"they free and TTFT falls {cp_peak['improvement']}% at 1.5 req/s. "
+        f"Cost: per-step scheduling, and a p99 you now have to watch."
+    ),
+}
+
+reflections = {
+    "sdecode": (
+        f"Scope the adaptive-K sweep before locking the fixed-K ladder. The "
+        f"adaptive lane regressed ({fmt(sd_adaptive)}×), so effort went into the "
+        f"lane that lost — better to rule that out on day one."
+    ),
+}
+
+
 def featured_sdecode() -> str:
     return f"""<article class="case case-featured reveal" id="sdecode" data-ink-point data-ink-say="sdecode. the target-call ledger.">
   <div class="case-copy">
@@ -767,6 +802,8 @@ def featured_sdecode() -> str:
       <div class="spec"><dt>ARTIFACTS</dt><dd>app · film · ledger</dd></div>
     </dl>
     <p class="case-note"><span class="note-mark"></span> Negative result included: adaptive K averaged {fmt(sd_adaptive)}× on this pair; both lanes stay in the receipt.</p>
+    <p class="case-decision"><b>Decision</b><span>{decisions['sdecode']}</span></p>
+    <p class="case-reflect"><b>Next time</b><span>{reflections['sdecode']}</span></p>
     <div class="case-links">
       <a class="btn btn-ink" href="{repo_url('sdecode')}" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
       <a class="btn btn-ghost" href="app/sdecode/index.html" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>
@@ -805,6 +842,10 @@ def mini_case(
         f'<a class="text-link" href="{app}" target="_blank" rel="noopener">Launch app <span aria-hidden="true">↗</span></a>'
         if app else ""
     )
+    decision = (
+        f'<p class="case-decision"><b>Decision</b><span>{decisions[slug]}</span></p>'
+        if slug in decisions else ""
+    )
     return f"""<article class="case-mini reveal" id="{slug}" data-ink-point data-ink-say="{name}. the receipt is in the repo.">
   <div class="case-meta"><span class="case-no">{index}</span><span>{category}</span><span>2026</span></div>
   <h3>{name}</h3>
@@ -815,6 +856,7 @@ def mini_case(
   <p class="case-claim"><strong>{claim_html}</strong></p>
   <p class="case-so">{consequences[slug]}</p>
   <p class="case-desc">{description}</p>
+  {decision}
   <div class="case-links">
     <a class="text-link strong" href="{repo_url(slug)}" target="_blank" rel="noopener">Open repo <span aria-hidden="true">↗</span></a>
     <a class="text-link" href="{receipt_url(slug)}" target="_blank" rel="noopener">receipt <span aria-hidden="true">↗</span></a>
