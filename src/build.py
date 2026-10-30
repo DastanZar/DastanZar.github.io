@@ -737,6 +737,26 @@ def proof_strip() -> str:
     )
 
 
+def cue_items() -> str:
+    """The act-break marquee, read from the same receipts as the rest of the page.
+
+    Tokens are (value, label). Nothing here is retyped by hand, so the band
+    cannot drift from the cards above it. One of the six is a loss on purpose:
+    a ticker that only carries wins is an advertisement, not a receipt.
+    """
+    tokens = [
+        (f"{fmt(sd_tpc)}&times;", "tokens per target call"),
+        (pm_saved, "fewer KV blocks"),
+        (f"{cp_peak['improvement']}%", "lower TTFT"),
+        (f"{bh_x:.2f}&times;", "weight compression"),
+        (f"{rl_batch_regress} of {rl_count}", "plans regress at bs=64"),
+        (f"{pd_kept} / {pd_vocab}", "tokens kept at the value state"),
+    ]
+    return "".join(
+        f"<span><b>{value}</b> {label}</span>" for value, label in tokens
+    )
+
+
 def hero_facts() -> str:
     facts = [
         ("CASE FILES", f"{len(projects)} on this page"),
@@ -1017,6 +1037,7 @@ replacements = {
     "SHIP_ROWS": shipping_rows(),
     "INVENTORY": inventory_meta() + "\n" + inventory_cards(),
     "LOSSES": losses(),
+    "CUE": cue_items(),
     "RECEIPT_TABS": receipt_tabs(),
     "MASCOT": mascot,
     "YEAR": "2026",

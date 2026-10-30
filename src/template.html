@@ -198,6 +198,13 @@ try {
     </div>
   </section>
 
+  <div class="cue-band" aria-hidden="true">
+    <div class="cue-track">
+      <div class="cue-run">{{CUE}}</div>
+      <div class="cue-run">{{CUE}}</div>
+    </div>
+  </div>
+
   <section class="receipts" id="receipts">
     <div class="wrap">
       <div class="section-head section-head-dark reveal">
@@ -255,12 +262,13 @@ try {
           <p>Tests assert the metric. Receipts are committed. The site reads them; it never retypes them. Drift fails the build.</p>
         </article>
       </div>
-      <div class="flow reveal" aria-label="Claim to page pipeline">
+      <div class="flow reveal" data-scrub aria-label="Claim to page pipeline">
         <span><b>CLAIM</b></span><i aria-hidden="true">→</i>
         <span><b>TEST</b></span><i aria-hidden="true">→</i>
         <span><b>RECEIPT</b></span><i aria-hidden="true">→</i>
         <span><b>PAGE</b></span>
         <em>one source of truth</em>
+        <div class="flow-fill" aria-hidden="true"></div>
       </div>
     </div>
   </section>

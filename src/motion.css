@@ -1901,3 +1901,206 @@
 .reduce-motion .tw-c.is-cursor::after {
   display: none;
 }
+
+
+/* ==========================================================================
+   Motion vocabulary
+
+   Three techniques borrowed as ideas and rebuilt on this page's own material.
+   None of them is imported: the stack is sticky sheet-pinning, the rail is
+   scroll-position-as-parameter written to one transform, and the band is a
+   duplicated-run marquee. Transform/opacity only.
+
+   Every one of them folds back to a static, fully-visible state under
+   .static (which is what ?static=1 and prefers-reduced-motion both set), so a
+   screenshot, a no-JS visitor, and a reduced-motion visitor all still get the
+   whole page. The stack is desktop-only: a deck of tall panels is a worse read
+   on a phone than plain vertical flow.
+   ========================================================================== */
+
+/* 1. Layer stack -----------------------------------------------------------
+   The section says "Twenty repos. Five layers." Each layer pins under the
+   masthead and the next slides over it, so the claim is something you scroll
+   through rather than something you read. The 1px rule on the incoming
+   sheet is the only depth cue on purpose: a soft shadow would be foreign to
+   a page made of paper and rules.                                                */
+@media (min-width: 981px) and (min-height: 720px) {
+  html:not(.static) .inventory-theme {
+    position: sticky;
+    top: 73px;
+    z-index: 1;
+    /* Opaque, so the layer above actually hides the one it lands on. */
+    background: var(--paper);
+  }
+
+  html:not(.static) .inventory-theme + .inventory-theme {
+    margin-top: clamp(120px, 30vh, 300px);
+  }
+
+  /* The incoming sheet needs an edge, or the outgoing cards read as a slicing
+     bug rather than a stack. The scrim is paper, not black: it fades the
+     covered layer into the sheet colour, so it is correct in all ten themes
+     without a per-theme shadow token. It only appears once a layer is in the
+     pinned band, so it never washes out the copy above the stack. */
+  html:not(.static) .inventory-theme.reveal.is-in {
+    clip-path: none;
+  }
+
+  html:not(.static) .inventory-theme::before {
+    content: "";
+    position: absolute;
+    right: -1px;
+    bottom: 100%;
+    left: -1px;
+    height: clamp(48px, 10vh, 120px);
+    background: linear-gradient(to top, var(--paper), var(--paper-a60) 45%, transparent);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-out);
+    pointer-events: none;
+  }
+
+  html:not(.static) .inventory-theme.is-current::before {
+    opacity: 1;
+  }
+
+  html:not(.static) .inventory-theme-no {
+    opacity: 0.4;
+    transition: opacity 0.35s var(--ease-out);
+  }
+
+  html:not(.static) .inventory-theme.is-current .inventory-theme-no {
+    opacity: 1;
+  }
+}
+
+/* 2. Scrubbed rail ---------------------------------------------------------
+   Scroll position is the parameter, exactly as a real timeline scrub works.
+   The rail fills left to right and the four stages light in order, so the
+   pipeline resolves as you move rather than all at once. The write is a single
+   transform on a single element — the same discipline as the scroll fix above,
+   which is why this does not reintroduce the style recalc.                       */
+.flow[data-scrub] {
+  position: relative;
+}
+
+.flow-fill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(1);
+  transform-origin: left;
+  pointer-events: none;
+}
+
+html:not(.static) .flow-fill {
+  transform: scaleX(0);
+}
+
+html:not(.static) .flow[data-scrub] span::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  transition: background 0.32s var(--ease-out), box-shadow 0.32s var(--ease-out);
+}
+
+html:not(.static) .flow[data-scrub] span.is-on::before {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+html:not(.static) .flow[data-scrub] span b {
+  color: var(--muted);
+  transition: color 0.32s var(--ease-out);
+}
+
+html:not(.static) .flow[data-scrub] span.is-on b {
+  color: var(--ink);
+}
+
+html:not(.static) .flow[data-scrub] > i {
+  color: var(--line-strong);
+  transition: color 0.32s var(--ease-out);
+}
+
+html:not(.static) .flow[data-scrub] > i.is-on {
+  color: var(--accent);
+}
+
+/* 3. Cue band --------------------------------------------------------------
+   An act break between the losses and the receipts: a marquee of measured
+   tokens, masked at both ends. It is the one place the numbers get to move,
+   and one of the six is a loss, because a ticker that only carries wins is an
+   advertisement. aria-hidden: every token here already appears in the proof
+   strip and the cards, so announcing it twice would only add noise.             */
+.cue-band {
+  overflow: hidden;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--paper-2);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.cue-track {
+  display: flex;
+  width: max-content;
+}
+
+.cue-run {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 13px;
+  color: var(--muted);
+  font: 9px / 1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cue-run span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.cue-run span::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  flex: 0 0 auto;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+
+.cue-run b {
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+html:not(.static) .cue-track {
+  animation: cue-scroll 46s linear infinite;
+}
+
+@keyframes cue-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Let a reader stop it to actually read a number. */
+@media (hover: hover) and (pointer: fine) {
+  .cue-band:hover .cue-track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.static) .cue-track {
+    animation: none;
+  }
+}
+

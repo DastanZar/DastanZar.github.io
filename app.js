@@ -186,19 +186,34 @@
           entries.forEach((entry) => {
             const state = twState.find((item) => item.element === entry.target);
             if (!state) return;
-            if (entry.isIntersecting) {
-              if (state.done) return;
-              twType(state);
-              if (state.once) {
-                state.done = true;
-                twObserver.unobserve(entry.target);
+            // Decide from real geometry, not from isIntersecting. Chrome flips
+            // isIntersecting the moment the ratio drops under the 0.3 threshold
+            // — a third of the way up the screen — so clearing on it blanked a
+            // heading the reader was still looking at and left the accent
+            // marker block painted with no characters inside it.
+            const box = entry.boundingClientRect;
+            const root = entry.rootBounds;
+            const viewTop = root ? root.top : 0;
+            const viewBottom = root ? root.bottom : window.innerHeight;
+            const shown = Math.max(0, Math.min(box.bottom, viewBottom) - Math.max(box.top, viewTop));
+            const fraction = box.height ? shown / box.height : 0;
+
+            // Genuinely gone: reset so it can type again on the way back.
+            if (fraction <= 0) {
+              if (!state.once) {
+                state.done = false;
+                twClear(state);
               }
-            } else if (!state.once) {
-              twClear(state);
+              return;
             }
+            if (state.done || fraction < 0.3) return;
+            state.done = true;
+            twType(state);
+            if (state.once) twObserver.unobserve(entry.target);
           });
         },
-        { threshold: 0.3 }
+        // 0 catches the true exit, where the 0.3 crossing alone never fires.
+        { threshold: [0, 0.3] }
       );
 
       twState.forEach((state) => {
@@ -393,6 +408,96 @@
     ];
     staggerGroups.forEach((group) =>
       group.forEach((element, index) => element.style.setProperty("--reveal-i", String(index % 6)))
+    );
+  }
+
+  // -----------------------------------------------------------------------
+  // Motion vocabulary: layer stack + scrubbed rail
+  //
+  // Both follow the rule the scroll fix established: never write an inherited
+  // custom property on :root per frame, and never read layout per frame. The
+  // stack is observer-driven (no scroll work at all), and the rail caches its
+  // document offset once and then writes a single transform.
+  // -----------------------------------------------------------------------
+  const layers = $$(".inventory-theme");
+  if (!staticMode && "IntersectionObserver" in window && layers.length) {
+    // A thin band just under the masthead: whichever layer occupies it is the
+    // one you are inside, so its index declares itself in the accent colour.
+    const layerObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => entry.target.classList.toggle("is-current", entry.isIntersecting));
+      },
+      { rootMargin: "-73px 0px -70% 0px", threshold: 0 }
+    );
+    layers.forEach((layer) => layerObserver.observe(layer));
+  }
+
+  const scrub = $("[data-scrub]");
+  if (scrub) {
+    const scrubFill = $(".flow-fill", scrub);
+    const scrubSteps = $$(":scope > span", scrub);
+    const scrubArrows = $$(":scope > i", scrub);
+    let scrubTop = 0;
+    let scrubActive = -1;
+    let scrubQueued = false;
+
+    const measureScrub = () => {
+      scrubTop = scrub.getBoundingClientRect().top + window.scrollY;
+    };
+
+    const paintScrub = () => {
+      scrubQueued = false;
+      const total = scrubSteps.length;
+      if (staticMode) {
+        if (scrubFill) scrubFill.style.transform = "scaleX(1)";
+        if (scrubActive === total) return;
+        scrubActive = total;
+        scrubSteps.forEach((step) => step.classList.add("is-on"));
+        scrubArrows.forEach((arrow) => arrow.classList.add("is-on"));
+        return;
+      }
+
+      const viewport = window.innerHeight;
+      // p = 0 as the rail enters the lower viewport, p = 1 as it passes the
+      // reading line just above the middle. Viewport-relative, so it behaves
+      // the same on a laptop and a tall monitor.
+      const travel = Math.max(1, viewport * 0.6);
+      const passed = window.scrollY + viewport * 0.95 - scrubTop;
+      const p = Math.min(1, Math.max(0, passed / travel));
+      if (scrubFill) scrubFill.style.transform = `scaleX(${p.toFixed(4)})`;
+
+      // The last stage lights a little before the rail is full, so the pipeline
+      // is already complete by the time it leaves the viewport.
+      let active = 0;
+      for (let index = 0; index < total; index += 1) {
+        if (p >= (index + 0.35) / total) active = index + 1;
+      }
+      if (active === scrubActive) return;
+      scrubActive = active;
+      scrubSteps.forEach((step, index) => step.classList.toggle("is-on", index < active));
+      scrubArrows.forEach((arrow, index) => arrow.classList.toggle("is-on", index < active - 1));
+    };
+
+    measureScrub();
+    paintScrub();
+
+    const remeasureScrub = () => {
+      measureScrub();
+      paintScrub();
+    };
+    window.addEventListener("resize", remeasureScrub, { passive: true });
+    window.addEventListener("load", remeasureScrub, { once: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasureScrub);
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!scrubQueued) {
+          scrubQueued = true;
+          requestAnimationFrame(paintScrub);
+        }
+      },
+      { passive: true }
     );
   }
 
