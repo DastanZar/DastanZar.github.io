@@ -235,6 +235,7 @@
   // -----------------------------------------------------------------------
   const THEMES = [
     ["light", "Light", "#f2efe5", "#141511"],
+    ["clearblue", "Clear Blue", "#fcfdff", "#18324c"],
     ["espresso", "Espresso", "#1a1512", "#f3ece1"],
     ["graphite", "Graphite", "#201f1a", "#f4f1e8"],
     ["forest", "Forest", "#101710", "#e9f0e4"],
@@ -499,6 +500,41 @@
       },
       { passive: true }
     );
+  }
+
+  // -----------------------------------------------------------------------
+  // Hero film: a looping video behind the paper. The film-lines control
+  // toggles it; the state survives the page, and a reduced-motion visitor
+  // starts with it paused. The poster frame is the static state.
+  // -----------------------------------------------------------------------
+  const heroFilm = $("[data-hero-film]");
+  const filmToggle = $("[data-hero-film-toggle]");
+  const body = document.body;
+  if (heroFilm && filmToggle && !staticMode) {
+    let filmPlaying = true;
+    body.setAttribute("data-film-on", "");
+    // Autoplay is best-effort; a muted loop usually goes. If it does not,
+    // the poster frame already carries the hero.
+    heroFilm.play().catch(() => {
+      filmPlaying = false;
+      body.removeAttribute("data-film-on");
+      filmToggle.setAttribute("aria-pressed", "false");
+    });
+    filmToggle.addEventListener("click", () => {
+      filmPlaying = !filmPlaying;
+      if (filmPlaying) {
+        heroFilm.play().catch(() => {});
+        body.setAttribute("data-film-on", "");
+      } else {
+        heroFilm.pause();
+        body.removeAttribute("data-film-on");
+      }
+      filmToggle.setAttribute("aria-pressed", String(filmPlaying));
+    });
+  } else if (heroFilm) {
+    // Static or no-JS: leave the poster and hide the video element entirely.
+    heroFilm.pause();
+    heroFilm.removeAttribute("autoplay");
   }
 
   // -----------------------------------------------------------------------

@@ -104,6 +104,13 @@ try {
 
 <main id="main">
   <section class="hero" id="top">
+    <div class="hero-film" aria-hidden="true">
+      <video muted loop playsinline preload="metadata" autoplay
+             poster="assets/videos/inference-film-poster.jpg"
+             data-hero-film>
+        <source src="assets/videos/inference-film.mp4" type="video/mp4">
+      </video>
+    </div>
     <div class="hero-grid-lines" aria-hidden="true"></div>
     <div class="wrap">
       <div class="hero-grid">
@@ -120,6 +127,11 @@ try {
               <a class="btn btn-ink" href="app/sdecode/index.html" target="_blank" rel="noopener">Try sdecode live <span aria-hidden="true">↗</span></a>
               <a class="btn btn-ghost" href="#work">Selected systems <span aria-hidden="true">↓</span></a>
               <a class="btn btn-ghost" href="https://github.com/DastanZar" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+              <button class="film-lines" type="button" data-hero-film-toggle aria-label="Play or pause the background film" aria-pressed="true" title="Play / pause film">
+                <span class="film-lines-window" aria-hidden="true">
+                  <span class="film-lines-track"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </span>
+              </button>
             </div>
             <p class="hero-nogpu"><span class="hero-nogpu-dot" aria-hidden="true"></span>Every number on this page ran on a CPU. No GPU needed to check any of it.</p>
           </div>

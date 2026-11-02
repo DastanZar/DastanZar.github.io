@@ -1056,6 +1056,9 @@ shutil.copyfile(SRC / "favicon.svg", ROOT / "favicon.svg")
 # Raster icon fallbacks (favicon.ico, favicon-16/32.png, apple-touch-icon.png)
 # are generated once by src/make_icons.py and read straight from the repo root.
 shutil.copyfile(SRC / "mascot.svg", ROOT / "assets" / "ink-mascot.svg")
+# The hero film: a looping video of an inference pipeline, with a poster frame
+# for the no-JS / reduced-motion visitor. Lives in assets/videos, served as-is
+# and referenced by the template. No copy step: it is already at the repo root.
 
 print("built index.html")
 print(f"sdecode: {sd_tpc:.3f} tok/call, c={sd_c:.3f}, adaptive={sd_adaptive:.3f}")

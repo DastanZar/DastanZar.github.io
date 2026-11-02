@@ -72,6 +72,19 @@
   transform: none;
 }
 
+/* The masthead rides over the hero film. Its default translucent paper is
+   enough over static paper, but a moving film underneath can fight the nav,
+   so while the film is playing the masthead gains a touch more paper. JS
+   sets data-film-on on <body> and mirrors the film-lines toggle state. */
+.js [data-hero-film-toggle][aria-pressed="true"] {
+  /* mark handled in JS; this is a no-op anchor for the rule below */
+}
+
+.js body[data-film-on] .masthead {
+  background: var(--paper);
+  transition: background 0.5s ease;
+}
+
 .js .hero h1 .line > span {
   transform: translateY(115%) rotate(1.2deg);
   transition: transform 1.08s var(--ease-out);

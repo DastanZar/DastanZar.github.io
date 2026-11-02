@@ -354,6 +354,60 @@ pre {
   border-bottom: 1px solid var(--line-strong);
 }
 
+/* The hero film: a looping inference-pipeline video behind the paper. The
+   gradient keeps the copy legible without a solid scrim, and the film fades
+   out under the receipt strip so the proof reads on paper, not on the film.
+   Under .static (reduced motion / ?static=1) the video is hidden and the
+   poster frame carries the section, so the page still composes. */
+.hero-film {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: url("assets/videos/inference-film-poster.jpg") 52% center / cover no-repeat;
+}
+
+.hero-film video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+}
+
+.hero-film::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--paper) 0%, var(--paper-a93) 40%, transparent 72%),
+    linear-gradient(0deg, var(--paper) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* A still hero reads better on a phone than a video you cannot pause. */
+@media (max-width: 760px) {
+  .hero-film video {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-film video {
+    display: none;
+  }
+}
+
+.js .hero-film video {
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out);
+}
+
+.js.is-ready .hero-film video {
+  opacity: 0.55;
+}
+
 .hero-grid-lines {
   position: absolute;
   inset: 0;
@@ -536,6 +590,90 @@ pre {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--paper);
+}
+
+/* The film-lines control: a vertical stack of thin bars, masked so the ends
+   dissolve. Clicking toggles the hero film. It sits in the action row as a
+   quiet fourth control, not a big video button. The track is animated on a
+   1.8s loop so the bars read as "film" at a glance. Pauses on hover, like
+   the cue band, so a reader can stop it. */
+.film-lines {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  pointer-events: auto;
+  align-self: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.film-lines:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.film-lines[aria-pressed="false"] {
+  opacity: 0.4;
+}
+
+.film-lines:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.film-lines-window {
+  display: block;
+  position: relative;
+  width: 18px;
+  height: 24px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(transparent, #000 20%, #000 80%, transparent);
+}
+
+.film-lines-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.film-lines-track i {
+  display: block;
+  flex: 0 0 2px;
+  background: currentColor;
+  width: 100%;
+}
+
+html:not(.static) .film-lines-track {
+  animation: film-lines-roll 1.8s linear infinite;
+}
+
+@keyframes film-lines-roll {
+  to {
+    transform: translateY(15px);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .film-lines:hover .film-lines-track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.static) .film-lines-track {
+    animation: none;
+  }
 }
 
 .hero-aside {
@@ -3371,6 +3509,28 @@ pre#receiptJson code {
   --band-text: #c4c0ac;
   --band-chrome: #2e2d25;
   --band-chrome-2: #39382e;
+}
+
+/* The clear-blue surface: the Aurbliq chapter pulled into the MLSys scale.
+   A cool, near-white paper with a deep-blue ink and a blue signal. The band
+   keeps its own deep blue so the receipts strip still reads as a dark room. */
+:root[data-theme="clearblue"] {
+  --paper: #fcfdff;
+  --paper-2: #f0f7ff;
+  --paper-3: #e8f3ff;
+  --ink: #18324c;
+  --ink-soft: #2b4a6b;
+  --muted: #526b84;
+  --line: color-mix(in srgb, var(--ink) 15%, transparent);
+  --line-strong: color-mix(in srgb, var(--ink) 30%, transparent);
+  --accent: #075fb8;
+  --band-bg: #121b26;
+  --band-deep: #0c131c;
+  --band-panel: #090f16;
+  --band-fg: #eaf3ff;
+  --band-text: #acbed2;
+  --band-chrome: #2a3a4e;
+  --band-chrome-2: #364a61;
 }
 
 /* Signal colour, independent of the surface. */
